@@ -1,6 +1,6 @@
 node_modules/
 dist/
-music/
+/music/
 tests/screens/
 tests/e2e-mobile.png
 *.log
