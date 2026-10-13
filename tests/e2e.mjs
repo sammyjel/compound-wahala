@@ -22,7 +22,10 @@ const page = await ctx.newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(String(e)));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
-page.setDefaultTimeout(8000);
+// Remote hosts (GAME_URL=https://...) get generous timeouts for slow connections.
+const TIMEOUT = GAME_URL.startsWith('http') ? 90000 : 8000;
+page.setDefaultTimeout(TIMEOUT);
+page.setDefaultNavigationTimeout(TIMEOUT);
 
 const S = () => page.evaluate(() => JSON.parse(JSON.stringify(window.__cw.app.game?.s ?? null)));
 const modalVisible = () => page.locator('.modal-backdrop').count().then((n) => n > 0);
@@ -261,6 +264,7 @@ await check('music: title track after first tap, day track in game, meeting musi
     HTMLMediaElement.prototype.play = function () { window.__played.push(this.src.split('/').pop()); return orig.call(this); };
   });
   const p = await c.newPage();
+  p.setDefaultTimeout(TIMEOUT);
   const errs = [];
   p.on('pageerror', (e) => errs.push(String(e)));
   await p.goto(GAME_URL);
@@ -293,6 +297,7 @@ await check('music: title track after first tap, day track in game, meeting musi
 // ── Mobile layout ──
 const mctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
 const m = await mctx.newPage();
+m.setDefaultTimeout(TIMEOUT);
 const merrors = [];
 m.on('pageerror', (e) => merrors.push(String(e)));
 await check('mobile: playable, no horizontal scroll, touch targets ≥ 36px', async () => {
