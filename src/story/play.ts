@@ -4,6 +4,8 @@
 import { sfx } from '../audio/sfx.ts';
 import { playMusic, sting, type Track } from '../audio/music.ts';
 import { track } from '../analytics.ts';
+import { newOffer, rewardedAvailable, showRewarded } from '../monetize/ads.ts';
+import { catalog, grownUpQuestion, ownsPremium, price, restore, startCheckout, type StoreItem } from '../monetize/store.ts';
 import { NPCS, PLAYER_LOOKS } from '../data/npcs.ts';
 import { createState } from '../engine/state.ts';
 import { drawPortrait } from '../render/people.ts';
@@ -180,7 +182,7 @@ export class Story implements StoryApi {
     const body = h('div', { class: 'shop' });
     const render = () => {
       clear(body);
-      body.append(h('p', { class: 'shop-coins' }, `You have 🪙 ${this.p.coins} coins. Earn more by playing levels — no real money, ever.`));
+      body.append(h('p', { class: 'shop-coins' }, `You have 🪙 ${this.p.coins} coins. Earn coins by playing levels — they can never be bought with real money.`));
       for (const d of DECOR) {
         const owned = this.p.owned.includes(d.id);
         const can = this.p.coins >= d.cost;
@@ -194,7 +196,45 @@ export class Story implements StoryApi {
       }
     };
     render();
-    openModal({ title: '🛍️ Decorate your compound', dismissable: true, body, actions: [{ label: 'Done', primary: true, onClick: () => {} }] });
+    const premium = h('div', { class: 'shop premium' });
+    openModal({ title: '🛍️ Decorate your compound', dismissable: true, body: [body, premium], actions: [{ label: 'Done', primary: true, onClick: () => {} }] });
+    // Optional "support the game" items — only shown when real payments have been enabled.
+    void catalog().then((items) => {
+      if (!items?.length) return;
+      premium.append(h('h3', { class: 'premium-h' }, '❤️ Support the game (grown-ups only)'),
+        h('p', { class: 'sub' }, 'Optional extras paid with real money by a parent. Everything in the game can be played without them.'));
+      for (const it of items) {
+        premium.append(h('div', { class: 'shop-item' + (ownsPremium(it.sku) ? ' owned' : '') },
+          h('span', { class: 'shop-text' }, h('strong', {}, it.name), h('small', {}, price(it))),
+          ownsPremium(it.sku) ? h('span', { class: 'shop-owned' }, '✓ Yours') : h('button', { class: 'big', type: 'button', onclick: () => this.grownUpCheckout(it) }, 'Ask a grown-up')));
+      }
+      premium.append(h('button', { class: 'linkish', type: 'button', onclick: async () => {
+        const code = prompt('Grown-ups: enter the receipt code (Paystack reference) to restore a purchase:');
+        if (!code) return;
+        const sku = await restore(code).catch(() => null);
+        alert(sku ? 'Restored! ✓' : 'No active purchase found for that code.');
+      } }, 'Restore a purchase'));
+    });
+  }
+
+  /** A grown-up check, then the parent's email for the Paystack receipt, then Paystack's own checkout page. */
+  private grownUpCheckout(it: StoreItem): void {
+    const { q, a } = grownUpQuestion();
+    const ans = h('input', { type: 'number', inputmode: 'numeric', 'aria-label': 'Answer', class: 'gate-input' }) as HTMLInputElement;
+    const email = h('input', { type: 'email', placeholder: 'Parent email (for the receipt)', 'aria-label': 'Parent email', class: 'gate-input' }) as HTMLInputElement;
+    openModal({
+      title: 'For grown-ups', dismissable: true,
+      body: [h('p', {}, `${it.name} costs ${price(it)} (real money). To continue, a grown-up must answer: what is ${q}?`), ans, email,
+        h('p', { class: 'sub' }, "You will pay on Paystack's secure page. We never see card details. Refunds: see the Feedback page.")],
+      actions: [
+        { label: 'Continue to payment', primary: true, onClick: () => {
+          if (Number(ans.value) !== a) { alert('That answer is not right.'); return false; }
+          if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.value)) { alert('Please enter a valid email for the receipt.'); return false; }
+          void startCheckout(it, email.value).then((url) => { location.href = url; }).catch((e) => alert(e.message));
+        } },
+        { label: 'Cancel', onClick: () => {} },
+      ],
+    });
   }
 
   looks(): void {
@@ -323,11 +363,30 @@ export class Story implements StoryApi {
           : h('button', { class: 'big primary', type: 'button', id: 'btn-next', onclick: () => void this.play(i + 1) }, '▶ NEXT LEVEL'),
         h('button', { class: 'big', type: 'button', id: 'btn-again', onclick: () => void this.play(i) }, '↻ Play again'),
         affordable ? h('button', { class: 'big', type: 'button', onclick: () => this.shop() }, '🛍️ Decorate') : null,
+        rewardedAvailable() ? this.adButton() : null,
         last ? null : h('button', { class: 'big ghost', type: 'button', onclick: () => this.showMap() }, '🏘️ All levels')),
     ));
     card.hidden = false;
     starEls.forEach((_, k) => { if (k < r.stars) setTimeout(() => sfx.star(), (250 + k * 300) * this.speed); });
     ($('#btn-next') as HTMLButtonElement).focus();
+  }
+
+  /** Optional rewarded ad for bonus coins. Only exists when an ad provider is configured. */
+  private adButton(): HTMLButtonElement {
+    const offer = newOffer('level_bonus');
+    const b = h('button', { class: 'big ghost', type: 'button', id: 'btn-ad' }, '📺 Optional: watch an ad for +20 bonus coins') as HTMLButtonElement;
+    b.onclick = async () => {
+      b.disabled = true;
+      const ok = await showRewarded(offer);
+      if (ok) {
+        this.p.coins += 20;
+        saveProgress(this.p);
+        this.refreshCoins();
+        sfx.coin();
+        b.textContent = '✓ +20 coins. Thank you!';
+      } else b.textContent = 'No reward this time — no problem!';
+    };
+    return b;
   }
 
   private crashCard(): void {
@@ -874,6 +933,21 @@ export class Story implements StoryApi {
         ctx.fillStyle = c;
         for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.arc(x + i * 10, 446 - Math.abs(i) * -4, 6, 0, Math.PI * 2); ctx.fill(); }
       }
+    }
+    if (ownsPremium('decor-naija-flags')) {
+      for (let i = 0; i < 9; i++) {
+        const x = 1040 + i * 26, y = 290;
+        ctx.fillStyle = '#5d4037'; ctx.fillRect(x, y - 30, 2, 30);
+        const wave = Math.sin(t * 3 + i) * 2;
+        ctx.fillStyle = '#008751'; ctx.fillRect(x + 2, y - 30 + wave, 6, 14);
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(x + 8, y - 30 + wave, 6, 14);
+        ctx.fillStyle = '#008751'; ctx.fillRect(x + 14, y - 30 + wave, 6, 14);
+      }
+    }
+    if (ownsPremium('decor-owambe')) {
+      ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fillRect(560, 560, 320, 10);
+      for (let i = 0; i < 10; i++) { ctx.fillStyle = i % 2 ? '#f2b632' : '#c8553d'; ctx.beginPath(); ctx.moveTo(560 + i * 32, 520); ctx.lineTo(592 + i * 32, 520); ctx.lineTo(588 + i * 32, 548); ctx.lineTo(564 + i * 32, 548); ctx.fill(); }
+      ctx.fillStyle = '#7b2d26'; ctx.fillRect(564, 520, 4, 140); ctx.fillRect(872, 520, 4, 140);
     }
     if (own('mural')) {
       ctx.fillStyle = '#7b2d26'; ctx.fillRect(66, 244, 6, 46); ctx.fillRect(208, 244, 6, 46);

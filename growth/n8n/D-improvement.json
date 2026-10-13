@@ -1,0 +1,129 @@
+{
+  "name": "Compound Wahala · D · Suggestions digest",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 8 * * 1"
+            }
+          ]
+        }
+      },
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd \"C:/Users/sammy/Downloads/compound-wahala\" && node growth/marketing/suggest.mjs"
+      },
+      "name": "Run script",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        240,
+        0
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json.exitCode ?? ($json.error ? 1 : 0)}}",
+              "operation": "notEqual",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "name": "Failed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.NOTIFY_WEBHOOK}}",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "text/plain",
+        "body": "=Compound Wahala · D · Suggestions digest failed: {{ ($json.stderr || $json.error?.message || '').slice(0, 300) }}"
+      },
+      "name": "Notify me",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Every Monday 08:30: sends you the suggestions from the latest report (hooks, lengths, posting times, series). It never changes settings or publishes experiments by itself.",
+        "height": 220,
+        "width": 380
+      },
+      "name": "About",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        180
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "Run script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run script": {
+      "main": [
+        [
+          {
+            "node": "Failed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Failed?": {
+      "main": [
+        [
+          {
+            "node": "Notify me",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Africa/Lagos"
+  },
+  "active": false
+}

@@ -157,3 +157,5 @@
   .goal-extra { flex-direction: column; gap: 4px; }
 }
 .reduce-motion .play-btn, .reduce-motion .act.pulse, .reduce-motion .act.hint, .reduce-motion .lvl.next, .reduce-motion .say-skip { animation: none !important; }
+.premium-h { margin: 14px 0 0; font-size: 1rem; }
+.gate-input { width: 100%; padding: 10px; border-radius: 10px; border: 2px solid var(--line); font: inherit; }

@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-13",
+  "sources": [
+    "YouTube API not connected",
+    "metrics.csv: 0 row(s)",
+    "Game analytics: ADMIN_TOKEN not set"
+  ],
+  "posts": [],
+  "bySeries": [],
+  "byLength": [],
+  "byHour": [],
+  "byPlatform": [],
+  "top": [],
+  "suggestions": [
+    "Not enough data yet to compare series (need at least 3 posts and 300 views in two groups).",
+    "Not enough data yet to compare video lengths (need at least 3 posts and 300 views in two groups).",
+    "Not enough data yet to compare posting times (need at least 3 posts and 300 views in two groups).",
+    "Not enough tracked players yet to say which content brings people into the game."
+  ]
+}

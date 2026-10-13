@@ -2,7 +2,13 @@
 
 A comedy social-simulation for the browser. You've just rented Room 4 in **Unity Compound, 7 Adebayo Close**: six flats, one generator, one water tank and endless opinions. Survive one week. Earn money, keep the light on and the tank full, settle shared bills, sort out neighbourhood wahala and win votes at the compound meetings.
 
-A week takes about 10–15 minutes. Works on desktop and phone, with mouse, touch or keyboard. It's fully playable with sound off.
+**Two ways to play:**
+- **Story Mode (default, for everyone incl. young players):** tap PLAY and you're in Level 1, "NEPA Don Take Light!", within seconds. Five short levels (≈1 minute each), one goal at a time, 2–3 big buttons, funny reactions to wrong guesses and no penalties. Earn coins and stars, decorate the compound and unlock player looks.
+- **Full Week mode (advanced):** the original 7-day simulation with money, bills and compound meetings. It unlocks after Level 5 and takes 10–15 minutes.
+
+Works on desktop and phone, with mouse, touch or keyboard. It's fully playable with sound off.
+
+**Growth, analytics, marketing and monetization tools:** see [growth/README.md](growth/README.md), [docs/LAUNCH-PLAN.md](docs/LAUNCH-PLAN.md), [docs/MONETIZATION.md](docs/MONETIZATION.md) and [docs/BASELINE.md](docs/BASELINE.md).
 
 ---
 
@@ -91,6 +97,9 @@ src/
     state.ts            State creation, effects, feedback, helpers
     rng.ts              Seeded RNG (reloading never re-rolls a day)
     save.ts             localStorage save/load + settings
+  story/                STORY MODE — levels.ts (5 level scripts), play.ts (controller), progress.ts (stars/coins/unlocks)
+  monetize/             ads.ts (rewarded ads, off) · store.ts (Paystack cosmetics, off)
+  analytics.ts          opt-in anonymous analytics client
   render/               DRAWING — reads state, never changes it
     scene.ts            Canvas compound: sky, building, props, lighting, labels, camera
     people.ts           Procedural cartoon characters + portraits
@@ -119,9 +128,10 @@ tests/
 ## Tests
 
 ```bash
-npm test             # 12 rules tests: missions, bills, disconnection, votes, determinism, save round-trip, full week
+npm test             # 17 rules tests: week rules + Story Mode progress (stars, unlocks, coins)
 npm run build
-npm run e2e          # 16 browser checks against dist/index.html using your installed Chrome/Edge
+npm run e2e          # 17 Full Week browser checks + 28 Story Mode checks (desktop + phone)
+npm run growth:test  # analytics, publishing workflow, reports, payments (17)
 npm run shots        # screenshots to tests/screens (desktop + phone)
 ```
 

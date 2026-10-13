@@ -1,7 +1,7 @@
 {
   "name": "compound-wahala",
   "private": true,
-  "version": "0.1.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,7 +11,15 @@
     "test": "node --experimental-strip-types --test tests/logic.test.ts tests/story.test.ts",
     "e2e": "node tests/e2e.mjs && node tests/story.mjs",
     "e2e:story": "node tests/story.mjs",
-    "shots": "node tests/shots.mjs"
+    "shots": "node tests/shots.mjs",
+    "growth:server": "node growth/server.mjs",
+    "growth:capture": "node growth/marketing/capture.mjs --all",
+    "growth:generate": "node growth/marketing/generate.mjs",
+    "growth:publish": "node growth/marketing/publish.mjs",
+    "growth:report": "node growth/marketing/report.mjs",
+    "growth:test": "node --test growth/tests/analytics.test.mjs growth/tests/workflow.test.mjs growth/tests/report.test.mjs growth/tests/payments.test.mjs",
+    "growth:store-e2e": "node growth/tests/store-e2e.mjs",
+    "growth:integration": "node growth/tests/integration.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.48.2",
@@ -19,5 +27,5 @@
     "vite": "^5.4.10",
     "vite-plugin-singlefile": "^2.0.3"
   },
-  "description": "COMPOUND WAHALA: Naija Neighbourhood Wars \u2014 a browser comedy/social-sim about life in a shared Nigerian compound."
+  "description": "COMPOUND WAHALA: Naija Neighbourhood Wars — a browser comedy/social-sim about life in a shared Nigerian compound."
 }

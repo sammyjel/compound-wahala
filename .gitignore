@@ -6,3 +6,9 @@ tests/e2e-mobile.png
 *.log
 /art/raw/
 /art/gen.log
+
+# growth tools: secrets, local databases, generated media
+growth/.env
+growth/data/
+growth/content/queue/
+growth/content/INBOX.md

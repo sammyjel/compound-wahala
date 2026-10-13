@@ -1,0 +1,47 @@
+{
+  "slots": [
+    {
+      "date": "2026-10-14",
+      "series": "nepa",
+      "timeUTC": "18:00",
+      "hookIndex": 0
+    },
+    {
+      "date": "2026-10-15",
+      "series": "refuse-to-pay",
+      "timeUTC": "18:00",
+      "hookIndex": 0
+    },
+    {
+      "date": "2026-10-16",
+      "series": "last-meat",
+      "timeUTC": "18:00",
+      "hookIndex": 0
+    },
+    {
+      "date": "2026-10-17",
+      "series": "meeting-wrong",
+      "timeUTC": "18:00",
+      "hookIndex": 0
+    },
+    {
+      "date": "2026-10-18",
+      "series": "parents-gen-bills",
+      "timeUTC": "18:00",
+      "hookIndex": 0
+    },
+    {
+      "date": "2026-10-19",
+      "series": "survive-7",
+      "timeUTC": "18:00",
+      "hookIndex": 0
+    },
+    {
+      "date": "2026-10-20",
+      "series": "funny-choices",
+      "timeUTC": "18:00",
+      "hookIndex": 1
+    }
+  ],
+  "next": 7
+}

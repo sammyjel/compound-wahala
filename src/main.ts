@@ -1,5 +1,7 @@
 import { recent, startSession, track } from './analytics.ts';
 import { unlockMusic } from './audio/music.ts';
+import { initAds } from './monetize/ads.ts';
+import { finishCheckoutFromUrl } from './monetize/store.ts';
 import { loadSprites } from './render/sprites.ts';
 import { Story } from './story/play.ts';
 import { App } from './ui/app.ts';
@@ -12,6 +14,9 @@ startSession();
 showTitle(app);
 // Character photos stream in; the title line-up and portraits use them as soon as they arrive.
 void loadSprites();
+// Monetization stays inert unless configured at build time (see growth/MONETIZATION.md).
+initAds();
+void finishCheckoutFromUrl().then((r) => { if (r) app.toast('Thank you! ❤️', `Purchase confirmed. Receipt code: ${r.reference}`, 'info'); });
 
 // Handy for debugging and automated tests: window.__cw.app.game.s, window.__cw.story.p
 (window as unknown as { __cw: unknown }).__cw = { app, story, showResults, analytics: recent, track };

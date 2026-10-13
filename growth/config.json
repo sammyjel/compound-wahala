@@ -1,0 +1,38 @@
+{
+  "_readme": "Your switches. Safe defaults: nothing publishes, nothing spends. See growth/README.md.",
+  "publishing": {
+    "killSwitch": true,
+    "_killSwitch": "true = ALL automated publishing is stopped. Set false only after you have approved the first campaign.",
+    "autoPublishRoutine": false,
+    "_autoPublishRoutine": "false = every item needs your approval in the review queue. true = items from already-approved series publish without asking.",
+    "platforms": {
+      "youtube": { "mode": "manual", "_mode": "manual | api (api needs YOUTUBE_* credentials)" },
+      "tiktok": { "mode": "manual" },
+      "instagram": { "mode": "manual" },
+      "facebook": { "mode": "manual" }
+    },
+    "maxRetries": 3
+  },
+  "workflows": {
+    "paused": false,
+    "_paused": "true = generate/publish/report all exit immediately (pause everything)."
+  },
+  "spend": {
+    "aiMonthlyLimitUSD": 0,
+    "_aiMonthlyLimitUSD": "0 = AI copywriting is off (free templates are used). Raise it to e.g. 3 to allow Claude API calls.",
+    "ttsMonthlyLimitUSD": 0,
+    "adsMonthlyLimitUSD": 0,
+    "_adsMonthlyLimitUSD": "Paid advertising is never launched by these tools."
+  },
+  "links": {
+    "game": "https://sammyjel.github.io/compound-wahala/",
+    "landing": "https://sammyjel.github.io/compound-wahala/home.html"
+  },
+  "recurringCosts": [
+    { "name": "GitHub Pages (game + landing)", "monthlyUSD": 0, "note": "Free for public repos" },
+    { "name": "Cloudflare Worker + D1 (analytics)", "monthlyUSD": 0, "note": "Free tier: 100k requests/day, 5 GB D1. Paid plan only if you outgrow it ($5/mo)." },
+    { "name": "Claude API (optional copywriting)", "monthlyUSD": 0, "note": "Off by default; capped by spend.aiMonthlyLimitUSD" },
+    { "name": "Video rendering (ffmpeg + Playwright, local)", "monthlyUSD": 0, "note": "Runs on your PC" },
+    { "name": "n8n (optional, self-hosted)", "monthlyUSD": 0, "note": "Free self-hosted; your n8n Cloud plan is billed separately by n8n" }
+  ]
+}

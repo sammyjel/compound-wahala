@@ -1,0 +1,77 @@
+{
+  "_readme": "Repeatable content series. Every piece is real gameplay of Compound Wahala with fictional characters. 'approved' lets autoPublishRoutine publish this series without asking (only if you turn that on in config.json).",
+  "label": "Gameplay from Compound Wahala · fictional characters",
+  "baseHashtags": ["#CompoundWahala", "#NaijaGames", "#NigerianGame", "#BrowserGame", "#FreeGame"],
+  "series": [
+    {
+      "id": "nepa",
+      "title": "NEPA DON TAKE LIGHT!",
+      "feature": { "kind": "level", "level": 1 },
+      "approved": false,
+      "hooks": ["POV: NEPA takes light in the middle of the party", "When the light goes and the generator has no fuel", "Would you call the electrician or find fuel first?"],
+      "beats": ["Lights on, Tobi dancing", "Blackout! Aunty Kemi: \"NEPA don take light again!\"", "Player picks CALL THE ELECTRICIAN → \"Na NEPA cut am, no be wire!\"", "Find fuel at Iya Bisi's kiosk, pour it in", "Pull the rope 3 times → VROOOM, lights back, everybody dances"],
+      "question": "What would YOU do first? 👇",
+      "hashtags": ["#NEPA", "#UpNEPA", "#Generator", "#NaijaComedy"]
+    },
+    {
+      "id": "refuse-to-pay",
+      "title": "When Your Nigerian Neighbour Refuses to Pay",
+      "feature": { "kind": "level", "level": 5 },
+      "approved": false,
+      "hooks": ["That one neighbour who never wants to pay for fuel", "\"Na me be ATM?\" — Brother Femi", "How do you split generator fuel fairly?"],
+      "beats": ["Chief bangs the gavel: fuel palaver!", "Femi: \"I no dey house all day!\"", "Pick FEMI PAYS FOR EVERYTHING → \"Na me be ATM?\"", "Pick PAY FOR THE HOURS YOU USE", "Everybody votes yes, owambe music"],
+      "question": "Which rule is fairest? 1, 2 or 3? 👇",
+      "hashtags": ["#Neighbours", "#NaijaComedy", "#CompoundLife"]
+    },
+    {
+      "id": "last-meat",
+      "title": "Who Took the Last Piece of Meat?",
+      "feature": { "kind": "level", "level": 4 },
+      "approved": false,
+      "hooks": ["Someone ate the LAST meat in Chief's pot 😱", "Be the detective: who chop the meat?", "The twist at the end 🐐"],
+      "beats": ["Chief: \"WHO ATE THE LAST MEAT IN MY POT?!\"", "Interview Femi, Tobi and Aunty Kemi", "Clues: tiny footprints, \"meeeh\"", "Accuse Femi → \"Me wey dey diet?!\"", "Reveal: Senator the goat 🐐"],
+      "question": "Did you guess it before the end? 👀",
+      "hashtags": ["#Detective", "#NaijaComedy", "#Goat"]
+    },
+    {
+      "id": "meeting-wrong",
+      "title": "Compound Meeting Gone Wrong",
+      "feature": { "kind": "level", "level": 5 },
+      "approved": false,
+      "hooks": ["Every Nigerian compound meeting be like…", "Order! Order! 🔨", "When the compound meeting turns into a court case"],
+      "beats": ["Chief opens the meeting", "Femi and Iya Bisi argue about fuel", "Wrong rule picked → drama", "Vote reveal, one by one", "Peace in the compound 🎉"],
+      "question": "Who is the Chief in YOUR compound? 😂",
+      "hashtags": ["#CompoundMeeting", "#Landlord", "#NaijaComedy"]
+    },
+    {
+      "id": "parents-gen-bills",
+      "title": "Nigerian Parents Versus Generator Bills",
+      "feature": { "kind": "level", "level": 1 },
+      "approved": false,
+      "hooks": ["Your parents when the generator is ON at 2pm", "Fuel price + generator + Nigerian parents = 😅", "Who finished the fuel?! Not me."],
+      "beats": ["Blackout", "Fuel hunt", "Generator roars", "Everyone celebrates — until someone asks who is paying"],
+      "question": "Tag the person who always finishes the fuel 😂",
+      "hashtags": ["#NaijaParents", "#Generator", "#FuelPrice"]
+    },
+    {
+      "id": "survive-7",
+      "title": "Can You Survive Seven Days in a Nigerian Compound?",
+      "feature": { "kind": "week" },
+      "approved": false,
+      "hooks": ["Can you survive 7 days in a Nigerian compound?", "Bills, blackouts, a goat named Senator and 4 compound meetings", "Day 1 in Unity Compound…"],
+      "beats": ["Move into Room 4", "NEPA bill lands", "Power cut, buy fuel", "First compound meeting vote", "Results screen title"],
+      "question": "How many days would you last? 👇",
+      "hashtags": ["#Challenge", "#CompoundLife", "#Lagos"]
+    },
+    {
+      "id": "funny-choices",
+      "title": "Funny Choices and Multiple Endings",
+      "feature": { "kind": "level", "level": 2 },
+      "approved": false,
+      "hooks": ["I picked the WRONG answer on purpose 😂", "Every wrong choice has a funny reply", "Tobi turned the bucket into a drum 🥁"],
+      "beats": ["Amaka's bucket is missing", "Search the wrong places: \"I dey sell bucket, I no dey steal am!\"", "Find Tobi drumming", "SNATCH IT vs ASK NICELY", "Bucket back, Amaka on time"],
+      "question": "Which wrong answer made you laugh? 😂",
+      "hashtags": ["#Choices", "#NaijaComedy", "#Pidgin"]
+    }
+  ]
+}

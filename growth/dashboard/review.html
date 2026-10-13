@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Compound Wahala · Review queue</title>
+<style>
+  :root { --g: #1f6f50; --gold: #f2b632; --ink: #2b1d14; --ink2: #6b5443; --line: #e7d6b8; --paper: #fffaf0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #f6efe1; color: var(--ink); }
+  header { background: var(--g); color: #fff; padding: 12px 18px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; border-bottom: 4px solid var(--gold); }
+  header h1 { font-size: 1.15rem; margin: 0; flex: 1; }
+  header a { color: #ffe08a; }
+  input, select, textarea { font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); }
+  button { font: inherit; border: 0; border-radius: 8px; padding: 8px 12px; font-weight: 700; background: var(--gold); cursor: pointer; }
+  button.ghost { background: #eee; }
+  button.no { background: #f6d5d0; }
+  main { padding: 16px; max-width: 1200px; margin: 0 auto; display: grid; gap: 16px; }
+  .item { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; grid-template-columns: 220px 1fr; gap: 16px; }
+  video { width: 220px; border-radius: 10px; background: #000; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; background: #eee; margin-right: 4px; }
+  .draft { background: #fdecc8; } .approved { background: #d8f0e2; } .rejected { background: #f6d5d0; } .published { background: #cfe3ff; } .partial { background: #e2d8ff; }
+  .issues { color: #a12b1c; font-weight: 700; }
+  pre { white-space: pre-wrap; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 8px; font-size: 0.85rem; max-height: 180px; overflow: auto; margin: 4px 0; }
+  details summary { cursor: pointer; font-weight: 700; margin: 6px 0; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+  .plat { border-top: 1px dashed var(--line); padding-top: 8px; margin-top: 8px; }
+  @media (max-width: 700px) { .item { grid-template-columns: 1fr; } video { width: 100%; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>🎬 Review queue</h1>
+  <select id="filter" aria-label="Show"><option value="">All</option><option>draft</option><option>approved</option><option>published</option><option>partial</option><option>rejected</option></select>
+  <input id="token" type="password" placeholder="Admin token" aria-label="Admin token" />
+  <button id="go">Load</button>
+  <a href="/dashboard">Dashboard →</a>
+</header>
+<main id="list"><p>Enter the admin token and press Load.</p></main>
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+try { $('#token').value = sessionStorage.getItem('cw.token') || ''; } catch {}
+const api = async (path, body) => {
+  const r = await fetch(path, { method: body ? 'POST' : 'GET', headers: { authorization: 'Bearer ' + $('#token').value, 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+  if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 160));
+  return r.json();
+};
+const copyBtn = (text) => `<button class="ghost" data-copy="${esc(text)}">Copy</button>`;
+
+async function load() {
+  try { sessionStorage.setItem('cw.token', $('#token').value); } catch {}
+  let items;
+  try { items = await api('/api/content'); } catch (e) { $('#list').innerHTML = `<p>Could not load: ${esc(e.message)}</p>`; return; }
+  const f = $('#filter').value;
+  items = items.filter((i) => !f || i.status === f);
+  if (!items.length) { $('#list').innerHTML = '<p>Nothing here. Run <code>npm run growth:generate</code>.</p>'; return; }
+  $('#list').innerHTML = items.map((i) => {
+    const c = i.copy, P = c.platforms;
+    const plats = Object.entries(i.platforms || {}).map(([p, st]) => `
+      <div class="plat"><b>${p}</b> <span class="tag ${st.status === 'published' ? 'published' : ''}">${esc(st.status)}</span>
+        ${st.url ? `<a href="${esc(st.url)}" target="_blank" rel="noopener">view post</a>` : ''}
+        ${st.lastError ? `<span class="issues">${esc(st.lastError)}</span>` : ''}
+        ${i.status !== 'draft' && i.status !== 'rejected' && st.status !== 'published' ? `<div class="row"><input placeholder="Paste the https:// post URL after you post it" size="44" data-url="${i.id}|${p}" /><button data-pub="${i.id}|${p}">Mark posted</button></div>` : ''}
+      </div>`).join('');
+    return `<article class="item">
+      <div><video src="/media/${i.id}/video.mp4" poster="/media/${i.id}/thumb.png" controls preload="none" playsinline></video>
+        <div class="row"><a href="/media/${i.id}/video.mp4" download>Download video</a> · <a href="/media/${i.id}/thumb.png" download>Thumbnail</a></div></div>
+      <div>
+        <div><span class="tag ${i.status}">${i.status}</span><span class="tag">${esc(i.series)}</span><span class="tag">post ${esc(i.scheduleAt.replace('T', ' ').slice(0, 16))} UTC</span><span class="tag">${i.video.duration.toFixed(1)}s ${i.video.width}×${i.video.height}</span>${i.aiUsed ? '<span class="tag">AI hooks</span>' : ''}</div>
+        <h2 style="margin:8px 0 4px">${esc(c.hook)}</h2>
+        ${i.validation.ok ? '<p>✅ Passed checks (size, length, audio, label, no false claims)</p>' : `<p class="issues">⚠ ${i.validation.issues.map(esc).join('<br>')}</p>`}
+        <details><summary>Script & concepts</summary><pre>${esc(c.script)}</pre><pre>Thumbnail: ${esc(c.thumbnail)}\nImage post: ${esc(c.imagePost)}${c.altHooks ? '\nAI hook ideas: ' + esc(c.altHooks.join(' | ')) : ''}</pre></details>
+        <details><summary>Captions per platform</summary>
+          <p><b>YouTube title</b> ${copyBtn(P.youtube.title)}</p><pre>${esc(P.youtube.title)}</pre>
+          <p><b>YouTube description</b> ${copyBtn(P.youtube.description)}</p><pre>${esc(P.youtube.description)}</pre>
+          <p><b>TikTok</b> ${copyBtn(P.tiktok.caption)}</p><pre>${esc(P.tiktok.caption)}</pre>
+          <p><b>Instagram</b> ${copyBtn(P.instagram.caption)}</p><pre>${esc(P.instagram.caption)}</pre>
+          <p><b>Facebook</b> ${copyBtn(P.facebook.caption)}</p><pre>${esc(P.facebook.caption)}</pre>
+        </details>
+        ${i.status === 'draft' ? `<div class="row"><button data-approve="${i.id}" ${i.validation.ok ? '' : 'disabled title="Fix the issues first"'}>✅ Approve</button><button class="no" data-reject="${i.id}">Reject</button></div>` : ''}
+        ${plats}
+      </div></article>`;
+  }).join('');
+  document.querySelectorAll('[data-approve]').forEach((b) => b.onclick = async () => { await api(`/api/content/${b.dataset.approve}/approve`, {}); load(); });
+  document.querySelectorAll('[data-reject]').forEach((b) => b.onclick = async () => { const note = prompt('Why? (helps future content)') || ''; await api(`/api/content/${b.dataset.reject}/reject`, { note }); load(); });
+  document.querySelectorAll('[data-pub]').forEach((b) => b.onclick = async () => {
+    const [id, platform] = b.dataset.pub.split('|');
+    const url = document.querySelector(`[data-url="${b.dataset.pub}"]`).value.trim();
+    try { await api(`/api/content/${id}/published`, { platform, url }); load(); } catch (e) { alert(e.message); }
+  });
+  document.querySelectorAll('[data-copy]').forEach((b) => b.onclick = () => navigator.clipboard.writeText(b.dataset.copy).then(() => { b.textContent = 'Copied'; }));
+}
+$('#go').onclick = load;
+$('#filter').onchange = load;
+if ($('#token').value) load();
+</script>
+</body>
+</html>

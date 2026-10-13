@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Compound Wahala · Growth dashboard</title>
+<style>
+  :root { --g: #1f6f50; --gold: #f2b632; --ink: #2b1d14; --ink2: #6b5443; --line: #e7d6b8; --paper: #fffaf0; --bad: #c0392b; --good: #1e9e5a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #f6efe1; color: var(--ink); }
+  header { background: var(--g); color: #fff; padding: 12px 18px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; border-bottom: 4px solid var(--gold); }
+  header h1 { font-size: 1.15rem; margin: 0; flex: 1; }
+  header input { padding: 6px 8px; border-radius: 8px; border: 0; min-width: 220px; }
+  header button, .btn { border: 0; border-radius: 8px; padding: 7px 12px; font-weight: 700; background: var(--gold); cursor: pointer; }
+  main { padding: 16px; max-width: 1280px; margin: 0 auto; display: grid; gap: 16px; }
+  section { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+  h2 { font-size: 1rem; margin: 0 0 10px; color: var(--g); text-transform: uppercase; letter-spacing: 0.06em; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .kpi b { display: block; font-size: 1.5rem; }
+  .kpi span { font-size: 0.8rem; color: var(--ink2); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  th { color: var(--ink2); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; }
+  .note { color: var(--ink2); font-size: 0.85rem; margin: 6px 0 0; }
+  .empty { color: var(--ink2); font-style: italic; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; background: #eee; }
+  .tag.measured { background: #d8f0e2; color: #145c34; }
+  .tag.estimate { background: #fdecc8; color: #7a5200; }
+  .tag.off { background: #f6d5d0; color: #7a2216; }
+  .tag.on { background: #d8f0e2; color: #145c34; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px; }
+  form.ledger { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  form.ledger input, form.ledger select { padding: 6px; border-radius: 8px; border: 1px solid var(--line); }
+  #status { font-size: 0.85rem; }
+  svg text { font-size: 10px; fill: var(--ink2); }
+  @media (max-width: 600px) { .grid2 { grid-template-columns: 1fr; } header input { min-width: 0; width: 100%; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>🏘️ Compound Wahala · Growth dashboard</h1>
+  <input id="api" placeholder="Analytics API URL (blank = this server)" aria-label="Analytics API URL" />
+  <input id="token" type="password" placeholder="Admin token" aria-label="Admin token" />
+  <button id="go">Load</button>
+  <span id="status"></span>
+</header>
+<main>
+  <section>
+    <h2>Players</h2>
+    <div class="kpis" id="kpis"><p class="empty">Enter the admin token and press Load.</p></div>
+    <p class="note">All numbers are counted from real events of players who agreed to anonymous statistics. Retention shows the sample size; small samples are not reliable.</p>
+  </section>
+  <section>
+    <h2>Daily active and new players (30 days)</h2>
+    <div id="chart"></div>
+  </section>
+  <div class="grid2">
+    <section><h2>Levels: completion and drop-off</h2><div id="levels"></div></section>
+    <section><h2>Traffic sources and campaigns</h2><div id="campaigns"></div>
+      <p class="note">First-touch attribution from links like <code>?utm_source=tiktok&amp;utm_campaign=nepa-1</code> (the landing page passes them to the game).</p></section>
+  </div>
+  <div class="grid2">
+    <section><h2>Optional ads and store</h2><div id="monet"></div></section>
+    <section><h2>Devices and errors</h2><div id="devices"></div></section>
+  </div>
+  <section>
+    <h2>Money: revenue, refunds, fees and costs</h2>
+    <div id="money"></div>
+    <form class="ledger" id="ledgerForm">
+      <input name="date" type="date" required aria-label="Date" />
+      <select name="kind" aria-label="Kind">
+        <option value="ad_revenue">Ad revenue</option><option value="purchase_revenue">Purchase revenue</option><option value="refund">Refund</option>
+        <option value="platform_fee">Platform / payment fee</option><option value="hosting">Hosting</option><option value="ai">AI / video tools</option>
+        <option value="marketing">Marketing spend</option><option value="other_cost">Other cost</option>
+      </select>
+      <input name="amount" type="number" step="0.01" min="0" placeholder="Amount (e.g. 12.50)" required aria-label="Amount" />
+      <input name="currency" value="USD" maxlength="3" size="4" aria-label="Currency" />
+      <select name="source" aria-label="Measured or estimate"><option value="measured">Measured (from a provider report)</option><option value="estimate">Estimate</option></select>
+      <input name="provider" placeholder="Provider (e.g. AdSense, Paystack)" aria-label="Provider" />
+      <input name="note" placeholder="Note" aria-label="Note" />
+      <button class="btn">Add entry</button>
+    </form>
+    <p class="note">Enter revenue as <b>measured</b> only when it comes from a provider's report or payout. Nothing on this page invents revenue.</p>
+    <div id="ledger"></div>
+  </section>
+  <div class="grid2">
+    <section><h2>Recurring costs and spending limits</h2><div id="costs"></div></section>
+    <section><h2>Marketing content pipeline</h2><div id="content"></div><p class="note"><a href="/review">Open the review queue →</a></p></section>
+  </div>
+</main>
+<script>
+const $ = (s) => document.querySelector(s);
+const pct = (x) => (x == null ? '—' : (x * 100).toFixed(0) + '%');
+const num = (x, d = 0) => (x == null ? '—' : Number(x).toFixed(d));
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const money = (c, cur) => (c / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + (cur ? ' ' + cur : '');
+try { $('#api').value = localStorage.getItem('cw.api') || ''; $('#token').value = sessionStorage.getItem('cw.token') || ''; } catch {}
+
+async function api(path, opts = {}) {
+  const base = ($('#api').value || '').replace(/\/$/, '');
+  const r = await fetch(base + path, { ...opts, headers: { authorization: 'Bearer ' + $('#token').value, 'content-type': 'application/json', ...(opts.headers || {}) } });
+  if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 120));
+  return r.json();
+}
+
+function table(head, rows) {
+  if (!rows.length) return '<p class="empty">No data yet.</p>';
+  return '<table><tr>' + head.map((h) => `<th>${h}</th>`).join('') + '</tr>' + rows.map((r) => '<tr>' + r.map((c) => `<td>${c}</td>`).join('') + '</tr>').join('') + '</table>';
+}
+
+function chart(series) {
+  const W = 1000, H = 180, max = Math.max(1, ...series.map((d) => d.dau));
+  const bw = W / series.length;
+  let s = `<svg viewBox="0 0 ${W} ${H + 20}" width="100%" role="img" aria-label="Daily active players chart">`;
+  series.forEach((d, i) => {
+    const h1 = (d.dau / max) * H, h2 = (d.new / max) * H;
+    s += `<rect x="${i * bw + 2}" y="${H - h1}" width="${bw - 4}" height="${h1}" fill="#1f6f50"><title>${d.day}: ${d.dau} active</title></rect>`;
+    s += `<rect x="${i * bw + 2}" y="${H - h2}" width="${bw - 4}" height="${h2}" fill="#f2b632"><title>${d.day}: ${d.new} new</title></rect>`;
+    if (i % 5 === 0) s += `<text x="${i * bw + 2}" y="${H + 14}">${d.day.slice(5)}</text>`;
+  });
+  return s + `</svg><p class="note"><span class="tag" style="background:#1f6f50;color:#fff">active</span> <span class="tag" style="background:#f2b632">new</span> · peak ${max}</p>`;
+}
+
+async function load() {
+  $('#status').textContent = 'Loading…';
+  try { localStorage.setItem('cw.api', $('#api').value); sessionStorage.setItem('cw.token', $('#token').value); } catch {}
+  try {
+    const s = await api('/api/stats?days=30');
+    const R = s.retention;
+    const kp = [
+      ['Players (120 days)', s.players], ['Active today', s.dau], ['Active 7 days', s.wau], ['Active 30 days', s.mau], ['New today', s.newToday],
+      ['Tutorial completion', pct(s.tutorial.rate) + ` (${s.tutorial.completed}/${s.tutorial.started})`], ['Sessions per player', num(s.sessions.perPlayer, 1)],
+      ['Median session', s.sessions.medianSeconds == null ? '—' : Math.round(s.sessions.medianSeconds) + 's'],
+      ['Day-1 retention', pct(R.d1.rate) + ` (n=${R.d1.eligible})`], ['Day-7 retention', pct(R.d7.rate) + ` (n=${R.d7.eligible})`], ['Day-30 retention', pct(R.d30.rate) + ` (n=${R.d30.eligible})`],
+      ['Finished level 1', s.firstMission],
+    ];
+    $('#kpis').innerHTML = kp.map(([k, v]) => `<div class="kpi"><b>${esc(v)}</b><span>${k}</span></div>`).join('');
+    $('#chart').innerHTML = chart(s.series);
+    $('#levels').innerHTML = table(['Level', 'Started', 'Finished', 'Finish %', 'Drop-off %', 'Avg ★', 'Median time'],
+      s.levels.map((l) => [l.level, l.started, l.completed, pct(l.completionRate), pct(l.abandonRate), num(l.avgStars, 1), l.medianSeconds == null ? '—' : Math.round(l.medianSeconds) + 's']));
+    $('#campaigns').innerHTML = table(['Source', 'Campaign', 'Players', 'Tutorial done', 'Level 1 done', 'Day-1 kept'],
+      s.campaigns.map((c) => [esc(c.source), esc(c.campaign || '—'), c.players, c.tutorialDone, c.level1Done, c.d1Rate == null ? '—' : pct(c.d1Rate) + ` (n=${c.d1Eligible})`]));
+    $('#monet').innerHTML = table(['Event', 'Count'], [['Rewarded ad offered', s.ads.offered], ['Rewarded ad started', s.ads.started], ['Rewarded ad completed (verified)', s.ads.completed],
+      ['Store opened', s.store.opened], ['Purchase started', s.store.initiated], ['Purchase completed (server-verified)', s.store.completed], ['Purchase failed', s.store.failed]])
+      + '<p class="note">Ads and real-money purchases are <span class="tag off">not enabled</span> until you approve a provider. Counts stay at 0 until then.</p>';
+    $('#devices').innerHTML = table(['Device', 'Sessions'], Object.entries(s.devices).map(([k, v]) => [esc(k), v])) + `<p class="note">Client errors reported: <b>${s.errors}</b></p>`;
+    const f = await api('/api/finance?days=30');
+    const fs = f.summary;
+    const cur = fs.currencies[0] || '';
+    const rows = ['ad_revenue', 'purchase_revenue', 'refund', 'platform_fee', 'hosting', 'ai', 'marketing', 'other_cost', 'gross', 'net'].map((k) => [k.replace('_', ' '), money(fs.measured[k], cur), money(fs.estimate[k], cur)]);
+    $('#money').innerHTML = (fs.mixedCurrencies ? '<p class="note" style="color:#c0392b">⚠ Ledger mixes currencies; totals are not converted.</p>' : '')
+      + table(['', '<span class="tag measured">Measured</span>', '<span class="tag estimate">Estimate</span>'], rows)
+      + table(['Metric (measured only)', 'Value'], [
+        ['Revenue per active player (30d)', fs.perActivePlayer == null || !fs.hasMeasuredRevenue ? '— no measured revenue yet' : money(fs.perActivePlayer, cur)],
+        ['Revenue per paying player', fs.perPayingPlayer == null ? '—' : money(fs.perPayingPlayer, cur)],
+        ['Ad revenue per 1000 completed ads', fs.adEcpm == null ? '—' : money(fs.adEcpm, cur)],
+        ['Marketing cost per new player', fs.costPerNewPlayer == null ? '—' : money(fs.costPerNewPlayer, cur)]]);
+    $('#ledger').innerHTML = table(['Date', 'Kind', 'Amount', 'Type', 'Provider', 'Note', ''], f.ledger.map((l) => [l.date, l.kind, money(l.amount_cents, l.currency), `<span class="tag ${l.source}">${l.source}</span>`, esc(l.provider), esc(l.note), `<button class="btn" data-del="${l.id}">✕</button>`]));
+    document.querySelectorAll('[data-del]').forEach((b) => b.onclick = async () => { if (confirm('Delete this entry?')) { await api('/api/ledger?id=' + b.dataset.del, { method: 'DELETE' }); load(); } });
+    $('#status').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    $('#status').textContent = 'Could not load analytics: ' + e.message;
+  }
+  // Local-only panels
+  try {
+    const c = await api('/api/config');
+    const pub = c.publishing || {};
+    $('#costs').innerHTML = table(['Item', '$/month', 'Note'], (c.recurringCosts || []).map((r) => [esc(r.name), num(r.monthlyUSD, 2), esc(r.note)]))
+      + `<p class="note">Kill switch: <span class="tag ${pub.killSwitch ? 'off' : 'on'}">${pub.killSwitch ? 'ON — publishing stopped' : 'off'}</span> · Auto-publish: <span class="tag ${pub.autoPublishRoutine ? 'on' : 'off'}">${pub.autoPublishRoutine ? 'on' : 'off (approval needed)'}</span> · Workflows: <span class="tag ${c.workflows?.paused ? 'off' : 'on'}">${c.workflows?.paused ? 'paused' : 'running'}</span></p>`
+      + `<p class="note">Spend limits per month: AI $${num(c.spend?.aiMonthlyLimitUSD, 2)} · TTS $${num(c.spend?.ttsMonthlyLimitUSD, 2)} · Ads $${num(c.spend?.adsMonthlyLimitUSD, 2)}. Spent this month: ${esc(JSON.stringify(c.spent?.byKind || {}))}</p>`;
+    const items = await api('/api/content');
+    const counts = {};
+    for (const i of items) counts[i.status] = (counts[i.status] || 0) + 1;
+    const posts = items.flatMap((i) => Object.entries(i.platforms || {}).filter(([, p]) => p.url).map(([k, p]) => [esc(i.title), k, `<a href="${esc(p.url)}" target="_blank" rel="noopener">post</a>`]));
+    $('#content').innerHTML = `<p>${Object.entries(counts).map(([k, v]) => `<span class="tag">${k}: ${v}</span>`).join(' ') || '<span class="empty">No content yet. Run npm run growth:generate.</span>'}</p>` + table(['Published', 'Platform', 'Link'], posts);
+  } catch (e) {
+    $('#costs').innerHTML = '<p class="empty">Costs and content panels need the local growth server (npm run growth:server).</p>';
+  }
+}
+
+$('#go').onclick = load;
+$('#ledgerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  try {
+    await api('/api/ledger', { method: 'POST', body: JSON.stringify({ date: f.get('date'), kind: f.get('kind'), amount_cents: Math.round(Number(f.get('amount')) * 100), currency: String(f.get('currency')).toUpperCase(), source: f.get('source'), provider: f.get('provider'), note: f.get('note') }) });
+    e.target.reset();
+    load();
+  } catch (err) { alert('Could not save: ' + err.message); }
+});
+if ($('#token').value) load();
+</script>
+</body>
+</html>

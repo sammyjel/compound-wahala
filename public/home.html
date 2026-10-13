@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Compound Wahala · Free Nigerian comedy game</title>
+<meta name="description" content="Fix funny problems in a busy Nigerian compound: blackouts, a missing bucket, rain on the laundry, a goat that eats the meat. Free in your browser — no download." />
+<meta property="og:title" content="Compound Wahala — free Nigerian comedy game" />
+<meta property="og:description" content="NEPA don take light! Help the compound in 5 short, funny levels. Free in your browser." />
+<meta property="og:image" content="media/trailer-poster.jpg" />
+<meta property="og:type" content="website" />
+<meta name="theme-color" content="#1f6f50" />
+<style>
+  :root { --g: #1f6f50; --gd: #143f2f; --gold: #f2b632; --cream: #fff6e5; --ink: #2b1d14; --ink2: #6b5443; --terra: #c8553d; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; color: var(--ink); background: var(--cream); line-height: 1.5; }
+  a { color: var(--g); }
+  .hero { background: radial-gradient(ellipse at 50% 0%, rgba(242,182,50,.25), transparent 60%), linear-gradient(180deg, var(--g), var(--gd)); color: var(--cream); padding: 28px 16px 40px; }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+  .hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 28px; align-items: center; }
+  h1 { font-family: "Arial Black", Impact, system-ui, sans-serif; line-height: 0.95; margin: 0 0 12px; }
+  h1 .a { display: block; font-size: clamp(2.2rem, 7vw, 4rem); }
+  h1 .b { display: block; font-size: clamp(2.8rem, 9vw, 5.2rem); color: var(--gold); text-shadow: 0 5px 0 #8a5a00; transform: rotate(-2deg); }
+  .lead { font-size: clamp(1.1rem, 3vw, 1.35rem); font-weight: 700; margin: 14px 0 20px; }
+  .play { display: inline-block; background: var(--gold); color: var(--ink); font-weight: 900; font-size: 1.5rem; padding: 16px 40px; border-radius: 999px; text-decoration: none; box-shadow: 0 5px 0 #8a5a00; }
+  .play:active { transform: translateY(3px); box-shadow: 0 2px 0 #8a5a00; }
+  .sub { opacity: 0.9; margin-top: 12px; font-size: 0.95rem; }
+  video { width: 100%; max-width: 340px; border-radius: 20px; border: 4px solid #fff; box-shadow: 0 14px 40px rgba(0,0,0,.4); display: block; margin: 0 auto; background: #000; }
+  section { padding: 36px 16px; }
+  h2 { font-family: "Arial Black", system-ui, sans-serif; color: var(--g); font-size: 1.6rem; margin: 0 0 16px; }
+  .levels { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  .lvl { background: #fff; border: 2px solid #e7d6b8; border-radius: 16px; padding: 14px; }
+  .lvl b { display: block; font-size: 1.05rem; }
+  .lvl .e { font-size: 2rem; }
+  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .shots img { width: 100%; border-radius: 12px; border: 2px solid #e7d6b8; display: block; }
+  .how { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .card { background: #fff; border: 2px solid #e7d6b8; border-radius: 16px; padding: 16px; }
+  .card h3 { margin: 0 0 6px; }
+  .band { background: var(--g); color: var(--cream); text-align: center; }
+  .band h2 { color: var(--gold); }
+  footer { padding: 24px 16px 40px; text-align: center; color: var(--ink2); font-size: 0.9rem; }
+  .pill { display: inline-block; background: #fff3c4; color: var(--ink); border-radius: 999px; padding: 2px 10px; font-weight: 700; font-size: 0.85rem; margin: 2px; }
+  @media (max-width: 760px) { .hero-grid { grid-template-columns: 1fr; text-align: center; } }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h1><span class="a">COMPOUND</span><span class="b">WAHALA</span></h1>
+      <p class="lead">NEPA don take light! Help your Nigerian compound fix funny problems — tap, laugh, earn coins. 🪙</p>
+      <a class="play" id="play" href="./">▶ PLAY NOW — FREE</a>
+      <p class="sub">Plays in your browser on phone or computer. No download, no sign-up, no real money.</p>
+      <p><span class="pill">5 short levels</span><span class="pill">Ages 7+</span><span class="pill">English + Pidgin</span><span class="pill">Full Week challenge</span></p>
+    </div>
+    <div>
+      <video src="media/trailer.mp4" poster="media/trailer-poster.jpg" controls playsinline preload="none" aria-label="Gameplay trailer"></video>
+      <p class="sub" style="text-align:center">Real gameplay · fictional characters · character art is AI-generated</p>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>What's the wahala?</h2>
+    <p>Welcome to Unity Compound, 7 Adebayo Close: six neighbours, one generator, one water tank and plenty of opinions. Every level is one funny everyday problem. Pick an action, watch what happens, try again if it goes wrong — nobody gets punished for experimenting.</p>
+    <div class="levels">
+      <div class="lvl"><span class="e">💡</span><b>1 · NEPA Don Take Light!</b>The light goes off. Get the generator running.</div>
+      <div class="lvl"><span class="e">🪣</span><b>2 · Where My Bucket?</b>Search the compound for Nurse Amaka's bucket.</div>
+      <div class="lvl"><span class="e">🌧️</span><b>3 · Rain Dey Come!</b>Take in Aunty Kemi's clothes before the rain.</div>
+      <div class="lvl"><span class="e">🍖</span><b>4 · Who Chop the Meat?</b>Be the detective. (The answer will surprise you.)</div>
+      <div class="lvl"><span class="e">⛽</span><b>5 · Fuel Palaver</b>Help everyone agree on a fair way to pay for fuel.</div>
+      <div class="lvl"><span class="e">🏘️</span><b>Then: Full Week mode</b>Survive 7 days of bills, blackouts and compound meetings.</div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <h2>Screenshots</h2>
+    <div class="shots">
+      <img src="media/story-phone-title.webp" alt="Title screen with the six neighbours" loading="lazy" />
+      <img src="media/story-phone-l1-choice.webp" alt="Level 1 on a phone: three big choices" loading="lazy" />
+      <img src="media/story-desktop-l1-choice.webp" alt="Level 1 on a computer" loading="lazy" />
+      <img src="media/story-phone-map.webp" alt="Level map with stars" loading="lazy" />
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap how">
+    <div class="card"><h3>📱 On a phone</h3>Open the link in Chrome or Safari and tap PLAY. Turn your sound on for the music. Tip: "Add to Home screen" to open it like an app.</div>
+    <div class="card"><h3>💻 On a computer</h3>Works in Chrome, Edge, Firefox and Safari. Click or use the keyboard: 1–3 to choose, Enter to skip talk, Esc to pause.</div>
+    <div class="card"><h3>👨‍👩‍👧 For parents</h3>No chat, no ads, no accounts, no purchases. Anonymous play statistics only if you say yes. <a href="privacy.html">Privacy details</a>.</div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Ready? Light don come! 💡</h2>
+    <a class="play" id="play2" href="./">▶ PLAY NOW — FREE</a>
+    <p class="sub">App store versions: not yet available. The browser game is the full game.</p>
+  </div>
+</section>
+
+<footer>
+  <p><a href="privacy.html">Privacy</a> · <a href="feedback.html">Feedback & bug reports</a> · <a href="https://github.com/sammyjel/compound-wahala/issues">Contact</a></p>
+  <p>All characters and places are fictional. © 2026 Compound Wahala.</p>
+</footer>
+<script>
+  // Pass campaign tags (utm_*, ref) from this page's link straight into the game, so a post → landing → play path is attributed.
+  (function () {
+    var q = location.search;
+    if (!q) return;
+    ['play', 'play2'].forEach(function (id) { document.getElementById(id).setAttribute('href', './' + q); });
+  })();
+</script>
+</body>
+</html>

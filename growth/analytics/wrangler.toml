@@ -1,0 +1,20 @@
+# Cloudflare Worker + D1 for Compound Wahala analytics (free tier). NOT deployed yet.
+# Deploy (needs YOUR Cloudflare account; free plan is enough):
+#   cd growth/analytics
+#   npx wrangler login
+#   npx wrangler d1 create compound-wahala-analytics      # paste the printed database_id below
+#   npx wrangler secret put ADMIN_TOKEN                     # a long random string; never commit it
+#   npx wrangler deploy
+# Then rebuild the game with VITE_ANALYTICS_URL=https://<your-worker>.workers.dev (see growth/README.md).
+name = "compound-wahala-analytics"
+main = "worker.mjs"
+compatibility_date = "2026-09-01"
+
+[vars]
+ALLOWED_ORIGINS = "https://sammyjel.github.io"
+RETENTION_DAYS = "400"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "compound-wahala-analytics"
+database_id = "REPLACE_WITH_ID_FROM_wrangler_d1_create"
