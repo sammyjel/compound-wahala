@@ -9,6 +9,10 @@ export type CharKey = (typeof NPC_IDS)[number] | 'player0' | 'player1' | 'player
 const KEYS: CharKey[] = [...NPC_IDS, 'player0', 'player1', 'player2'];
 const bodies = new Map<CharKey, HTMLImageElement>();
 const faces = new Map<CharKey, HTMLImageElement>();
+let settled = false;
+
+/** True once every image has loaded or failed (or the timeout passed). */
+export const spritesSettled = () => settled;
 
 function load(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
@@ -26,7 +30,9 @@ export function loadSprites(timeoutMs = 4000): Promise<void> {
     load(`chars/${k}-body.webp`).then((img) => { if (img) bodies.set(k, img); }),
     load(`chars/${k}-face.webp`).then((img) => { if (img) faces.set(k, img); }),
   ]);
-  return Promise.race([Promise.all(all).then(() => undefined), new Promise<void>((r) => setTimeout(r, timeoutMs))]);
+  return Promise.race([Promise.all(all).then(() => undefined), new Promise<void>((r) => setTimeout(r, timeoutMs))]).then(() => {
+    settled = true;
+  });
 }
 
 export const bodyImg = (k: CharKey) => bodies.get(k) ?? null;

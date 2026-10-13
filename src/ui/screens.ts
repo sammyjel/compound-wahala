@@ -7,7 +7,7 @@ import { finalResults, Game } from '../engine/game.ts';
 import { deleteSave, loadGame, saveInfo, storageAvailable, type Settings } from '../engine/save.ts';
 import { naira, trustTier } from '../engine/state.ts';
 import { drawPerson, drawPortrait } from '../render/people.ts';
-import { bodyImg, drawFace, drawSprite, type CharKey } from '../render/sprites.ts';
+import { bodyImg, drawFace, drawSprite, spritesSettled, type CharKey } from '../render/sprites.ts';
 import { NPC_IDS } from '../types.ts';
 import type { GameState } from '../types.ts';
 import type { App } from './app.ts';
@@ -51,14 +51,14 @@ export function showTitle(app: App): void {
     order.forEach((id, i) => {
       const x = 170 + i * 172;
       const img = bodyImg(id);
+      if (!img && !spritesSettled()) return; // still loading: draw nothing rather than flash the fallback art
       if (img) drawSprite(ctx, img, x, 410 - (i % 2) * 10, { t: t + i, height: 390 * NPCS[id].look.height, dance: id === 'tobi' });
       else drawPerson(ctx, x, 400 - (i % 2) * 12, 2.15, NPCS[id].look, { t: t + i, dance: id === 'tobi', wave: id === 'kemi', talking: id === 'chief' && Math.sin(t) > 0 });
     });
-    t += 0.016;
+    if (!app.settings.reduceMotion) t += 0.016;
     requestAnimationFrame(draw);
   };
-  if (!app.settings.reduceMotion) requestAnimationFrame(draw);
-  else { t = 1; draw(); }
+  requestAnimationFrame(draw);
   (el.querySelector('#btn-continue, #btn-new') as HTMLElement | null)?.focus();
 }
 

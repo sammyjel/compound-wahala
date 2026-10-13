@@ -389,9 +389,11 @@ export class App {
     if (!c) {
       c = h('canvas', { width: size * 2, height: size * 2, class: 'portrait', style: `width:${size}px;height:${size}px`, 'aria-hidden': 'true' });
       const look = id === 'you' ? PLAYER_LOOKS[this.game?.s.counters['look'] ?? 0] : NPCS[id].look;
-      const key = (id === 'you' ? `player${this.game?.s.counters['look'] ?? 0}` : id) as CharKey;
-      if (!drawFace(c, key)) drawPortrait(c, look, id === 'you' ? '#d6ecff' : PORTRAIT_BG[id]);
-      if (id !== 'you') this.portraitCache.set(key, c);
+      const charKey = (id === 'you' ? `player${this.game?.s.counters['look'] ?? 0}` : id) as CharKey;
+      const photo = drawFace(c, charKey);
+      if (!photo) drawPortrait(c, look, id === 'you' ? '#d6ecff' : PORTRAIT_BG[id]);
+      // Only cache real photos, so a fallback drawn before the art loads gets replaced later.
+      if (id !== 'you' && photo) this.portraitCache.set(key, c);
       return c;
     }
     const copy = h('canvas', { width: c.width, height: c.height, class: 'portrait', style: c.getAttribute('style') ?? '', 'aria-hidden': 'true' });
