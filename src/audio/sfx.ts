@@ -67,5 +67,14 @@ export const sfx = {
   powerOn: () => { tone(220, 0.25, 'sine', 0.07, 0, 500); },
   gavel: () => { noise(0.08, 0.3, 0, 1500); tone(180, 0.12, 'square', 0.06); },
   vote: (yes: boolean) => tone(yes ? 740 : 260, 0.12, 'triangle', 0.07),
+  // Story Mode
+  boing: () => { tone(420, 0.22, 'sine', 0.09, 0, 260); tone(300, 0.18, 'sine', 0.06, 0.12, -120); },
+  sputter: () => { for (let i = 0; i < 3; i++) { noise(0.07, 0.18, i * 0.11, 500); tone(60, 0.07, 'square', 0.05, i * 0.11); } },
+  drum: () => { tone(110, 0.16, 'sine', 0.2, 0, -50); tone(160, 0.1, 'sine', 0.14, 0.22, -60); },
+  thunder: () => { noise(1.6, 0.28, 0, 180); noise(0.9, 0.18, 0.3, 400); },
+  goat: () => { for (let i = 0; i < 4; i++) tone(520 - i * 8, 0.09, 'sawtooth', 0.04, i * 0.08); },
+  splash: () => { noise(0.35, 0.14, 0, 2400); tone(900, 0.12, 'sine', 0.04, 0.05, -500); },
+  cheer: () => { noise(0.9, 0.06, 0, 3000); [659, 784, 988, 1319].forEach((f, i) => tone(f, 0.2, 'triangle', 0.07, i * 0.07)); },
+  star: () => tone(1568, 0.22, 'triangle', 0.07, 0, 400),
   night: () => { tone(392, 0.3, 'sine', 0.05); tone(330, 0.4, 'sine', 0.05, 0.25); },
 };

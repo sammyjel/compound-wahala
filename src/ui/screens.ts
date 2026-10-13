@@ -1,3 +1,4 @@
+import { analyticsConfigured, consent, deleteMyData, setConsent, track } from '../analytics.ts';
 import { sfx } from '../audio/sfx.ts';
 import { playMusic } from '../audio/music.ts';
 import { MISSIONS } from '../data/missions.ts';
@@ -18,28 +19,26 @@ import { confirmDialog, openModal } from './modal.ts';
 
 export function showTitle(app: App): void {
   const el = $('#screen-title');
-  $('#screen-game').hidden = true;
-  $('#screen-results').hidden = true;
+  app.story?.leave();
+  for (const id of ['#screen-game', '#screen-results']) $(id).hidden = true;
   el.hidden = false;
   playMusic('title');
   clear(el);
-  const info = saveInfo();
   const art = h('canvas', { class: 'title-art', width: 1200, height: 420, 'aria-hidden': 'true' });
-  const canContinue = info && !info.ended;
   el.append(
     h('div', { class: 'title-wrap' },
       art,
       h('h1', { class: 'logo' }, h('span', { class: 'l1' }, 'COMPOUND'), h('span', { class: 'l2' }, 'WAHALA')),
-      h('p', { class: 'subtitle' }, 'Naija Neighbourhood Wars'),
-      h('p', { class: 'tagline' }, 'Six flats. One generator. Everybody has a secret, and nobody wants to pay their share.'),
+      h('p', { class: 'tagline big-tag' }, 'Fix funny problems in a busy Nigerian compound. Tap, laugh, earn coins! 🪙'),
       h('div', { class: 'title-btns' },
-        canContinue ? h('button', { class: 'big primary', type: 'button', id: 'btn-continue', onclick: () => continueGame(app) }, `Continue — Day ${info!.day} (${info!.name})`) : null,
-        h('button', { class: 'big' + (canContinue ? '' : ' primary'), type: 'button', id: 'btn-new', onclick: () => newGameFlow(app) }, 'New Game'),
-        h('button', { class: 'big ghost', type: 'button', onclick: () => howToPlay() }, 'How to Play'),
-        h('button', { class: 'big ghost', type: 'button', onclick: () => settingsModal(app) }, 'Settings'),
+        h('button', { class: 'big primary play-btn', type: 'button', id: 'btn-play', onclick: () => { sfx.good(); app.story?.playNext(); } }, '▶ PLAY'),
+        h('div', { class: 'title-row' },
+          h('button', { class: 'big ghost', type: 'button', id: 'btn-levels', onclick: () => app.story?.showMap() }, '🏘️ Levels'),
+          h('button', { class: 'big ghost', type: 'button', id: 'btn-settings', onclick: () => settingsModal(app) }, '⚙️ Settings')),
       ),
       !storageAvailable() ? h('p', { class: 'warn-note' }, 'Your browser is blocking storage, so progress cannot be saved in this window.') : null,
-      h('p', { class: 'fineprint' }, 'All characters are fictional. In-game naira only — no real money, ads or data collection. A week is about 10–15 minutes.'),
+      h('p', { class: 'fineprint' }, 'All characters are fictional. Free to play — no real money. ',
+        h('a', { href: 'privacy.html', class: 'fine-link' }, 'Privacy'), ' · ', h('a', { href: 'feedback.html', class: 'fine-link' }, 'Feedback & bugs')),
     ),
   );
   let t = 0;
@@ -59,10 +58,43 @@ export function showTitle(app: App): void {
     requestAnimationFrame(draw);
   };
   requestAnimationFrame(draw);
-  (el.querySelector('#btn-continue, #btn-new') as HTMLElement | null)?.focus();
+  ($('#btn-play') as HTMLElement).focus();
+  if (consent() === null) consentPrompt();
 }
 
-function continueGame(app: App): void {
+/** One-time, plain-language choice about anonymous play statistics. Nothing is sent before "Yes". */
+export function consentPrompt(): void {
+  if (document.querySelector('.consent-bar')) return;
+  const bar = h('div', { class: 'consent-bar', role: 'region', 'aria-label': 'Privacy choice' },
+    h('p', {}, '📊 Can we count how people play (anonymous — no names, no ad tracking) to make the game better? ', h('a', { href: 'privacy.html' }, 'Details')),
+    h('div', { class: 'consent-btns' },
+      h('button', { class: 'big primary', type: 'button', id: 'consent-yes', onclick: () => { setConsent('yes'); bar.remove(); } }, 'Yes, OK'),
+      h('button', { class: 'big', type: 'button', id: 'consent-no', onclick: () => { setConsent('no'); bar.remove(); } }, 'No thanks')));
+  document.body.append(bar);
+}
+
+/** The original 7-day game, now an unlockable mode for experienced players. */
+export function weekMenu(app: App): void {
+  const info = saveInfo();
+  const canContinue = !!info && !info.ended;
+  openModal({
+    title: '🏘️ Full Week mode',
+    kicker: 'For experienced players',
+    dismissable: true,
+    body: h('p', {}, 'Survive 7 days in Unity Compound: earn money, keep the light on and the tank full, share the bills and win votes at compound meetings.'),
+    actions: [
+      ...(canContinue ? [{ label: `Continue — Day ${info!.day} (${info!.name})`, primary: true, onClick: () => { setTimeout(() => continueGame(app), 0); } }] : []),
+      { label: 'Start a new week', primary: !canContinue, onClick: () => { setTimeout(() => void newGameFlow(app), 0); } },
+      { label: 'How to play', onClick: () => { setTimeout(() => howToPlay(), 0); } },
+    ],
+  });
+  // Stable ids for tests and keyboard users.
+  const btns = document.querySelectorAll<HTMLButtonElement>('.modal .choice');
+  if (canContinue) btns[0].id = 'btn-continue';
+  btns[canContinue ? 1 : 0].id = 'btn-new';
+}
+
+export function continueGame(app: App): void {
   const s = loadGame();
   if (!s) {
     app.toast('No save found', 'Starting fresh.', 'info');
@@ -73,7 +105,7 @@ function continueGame(app: App): void {
   app.start(new Game(s));
 }
 
-async function newGameFlow(app: App): Promise<void> {
+export async function newGameFlow(app: App): Promise<void> {
   const info = saveInfo();
   if (info && !info.ended) {
     const ok = await confirmDialog('Start a new game?', `This will erase your saved game (${info.name}, Day ${info.day}). This cannot be undone.`, 'Erase and start new', true);
@@ -109,6 +141,7 @@ async function newGameFlow(app: App): Promise<void> {
         const g = Game.create(input.value || 'Ade');
         g.s.counters['look'] = look;
         sfx.good();
+        track('week_start', {});
         app.start(g);
       },
     }],
@@ -170,6 +203,16 @@ export function settingsModal(app: App): void {
       toggle('translations', 'Plain-English translations', 'Shows plain English under Pidgin and slang.'),
       toggle('labels', 'Place & name labels', 'Labels over people and objects in the compound.'),
       toggle('reduceMotion', 'Reduce motion', 'Fewer animations, instant walking.'),
+      h('button', { class: 'toggle', type: 'button', role: 'switch', 'aria-checked': String(consent() === 'yes'),
+        onclick: () => { setConsent(consent() === 'yes' ? 'no' : 'yes'); render(); } },
+        h('span', { class: 'tlabel' }, 'Anonymous play statistics', h('small', {}, analyticsConfigured() ? 'Helps us improve the game. No names, no ad tracking.' : 'Helps us improve the game. (Not connected yet, so nothing is sent.)')),
+        h('span', { class: 'knob' }, consent() === 'yes' ? 'On' : 'Off')),
+      h('button', { class: 'linkish', type: 'button', id: 'btn-delete-data', onclick: async () => {
+        const ok = await confirmDialog('Delete my data?', 'This erases your anonymous play statistics from our server and gives you a new random id. Your game progress stays.', 'Delete', true);
+        if (!ok) return;
+        const r = await deleteMyData();
+        app.toast(r === 'failed' ? 'Could not reach the server' : 'Done', r === 'failed' ? 'Try again later.' : 'Your statistics were deleted.', 'info');
+      } }, 'Delete my statistics data'),
     );
   };
   render();
@@ -307,6 +350,7 @@ export function showResults(app: App, s: GameState): void {
       h('button', { class: 'big primary', type: 'button', onclick: () => { deleteSave(); newGameFlow(app); } }, 'Play another week'),
       h('button', { class: 'big', type: 'button', onclick: async () => { try { await navigator.clipboard.writeText(shareText); app.toast('Copied!', 'Paste it to your group chat.', 'info'); } catch { app.toast('Copy failed', shareText, 'info'); } } }, 'Copy my results'),
       h('button', { class: 'big ghost', type: 'button', onclick: () => showTitle(app) }, 'Title screen'),
+      h('button', { class: 'big ghost', type: 'button', onclick: () => app.story?.showMap() }, 'Story levels'),
     ),
   ));
   sfx.mission();

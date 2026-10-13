@@ -18,6 +18,14 @@ const check = async (name, fn) => {
 };
 
 const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+// Full Week mode unlocks after Story Mode; start these tests as a player who finished it.
+const finishedStory = () => {
+  localStorage.setItem('compoundWahala.consent.v1', 'no');
+  if (!localStorage.getItem('compoundWahala.story.v1')) {
+    localStorage.setItem('compoundWahala.story.v1', JSON.stringify({ v: 1, stars: [3, 3, 3, 3, 3], coins: 0, owned: [], look: 0 }));
+  }
+};
+await ctx.addInitScript(finishedStory);
 const page = await ctx.newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(String(e)));
@@ -28,6 +36,11 @@ page.setDefaultTimeout(TIMEOUT);
 page.setDefaultNavigationTimeout(TIMEOUT);
 
 const S = () => page.evaluate(() => JSON.parse(JSON.stringify(window.__cw.app.game?.s ?? null)));
+/** Title → Levels → Full Week menu. */
+async function openWeek() {
+  await page.click('#btn-levels');
+  await page.click('#btn-week');
+}
 const modalVisible = () => page.locator('.modal-backdrop').count().then((n) => n > 0);
 
 /** Resolve whatever event modals are open by picking the first allowed choice. */
@@ -44,10 +57,12 @@ async function drainEvents(max = 10) {
   }
 }
 
-await check('title screen loads with New Game', async () => {
+await check('title screen loads; Full Week mode opens from the level map', async () => {
   await page.goto(GAME_URL);
-  await page.waitForSelector('#btn-new');
+  await page.waitForSelector('#btn-play');
   assert.ok(await page.isVisible('.logo'));
+  await openWeek();
+  await page.waitForSelector('#btn-new');
 });
 
 await check('new game: name entry, arrival event, keyboard choice', async () => {
@@ -193,6 +208,8 @@ let snapshot;
 await check('autosave + resume after reload restores the same game', async () => {
   snapshot = await S();
   await page.reload();
+  await page.waitForSelector('#btn-play');
+  await openWeek();
   await page.waitForSelector('#btn-continue');
   assert.match(await page.textContent('#btn-continue'), /Day 2 \(Testy\)/);
   await page.click('#btn-continue');
@@ -215,9 +232,11 @@ await check('restart asks for confirmation (cancel keeps progress)', async () =>
 await check('new game from title asks before erasing the save', async () => {
   await page.click('#btn-menu');
   await page.getByRole('button', { name: 'Save and quit to title' }).click();
+  await openWeek();
   await page.click('#btn-new');
   await page.waitForSelector('.modal:has-text("Start a new game?")');
   await page.getByRole('button', { name: 'Cancel' }).click();
+  await page.click('#btn-week');
   assert.ok(await page.isVisible('#btn-continue'));
   await page.click('#btn-continue');
 });
@@ -258,6 +277,7 @@ await check('no uncaught errors on desktop run', async () => {
 // ── Music ──
 await check('music: title track after first tap, day track in game, meeting music + sting', async () => {
   const c = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+  await c.addInitScript(finishedStory);
   await c.addInitScript(() => {
     window.__played = [];
     const orig = HTMLMediaElement.prototype.play;
@@ -268,6 +288,8 @@ await check('music: title track after first tap, day track in game, meeting musi
   const errs = [];
   p.on('pageerror', (e) => errs.push(String(e)));
   await p.goto(GAME_URL);
+  await p.click('#btn-levels');
+  await p.click('#btn-week');
   await p.click('#btn-new');
   const played = () => p.evaluate(() => window.__played);
   assert.ok((await played()).includes('title.mp3'), 'title after first tap: ' + (await played()));
@@ -296,12 +318,15 @@ await check('music: title track after first tap, day track in game, meeting musi
 
 // ── Mobile layout ──
 const mctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
+await mctx.addInitScript(finishedStory);
 const m = await mctx.newPage();
 m.setDefaultTimeout(TIMEOUT);
 const merrors = [];
 m.on('pageerror', (e) => merrors.push(String(e)));
 await check('mobile: playable, no horizontal scroll, touch targets ≥ 36px', async () => {
   await m.goto(GAME_URL);
+  await m.tap('#btn-levels');
+  await m.tap('#btn-week');
   await m.tap('#btn-new');
   await m.fill('#name-input', 'Phone');
   await m.tap('.modal .choice.primary');

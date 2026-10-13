@@ -36,12 +36,25 @@ export interface SceneDeps {
   playerKey: () => CharKey;
   markers: () => Set<string>;
   settings: () => { labels: boolean; reduceMotion: boolean };
+  // Optional hooks used by Story Mode. The full-week game leaves them unset.
+  /** Override where residents stand (null = not in the compound). */
+  npcPos?: (id: NpcId) => { x: number; y: number } | null;
+  /** Force a resident to dance (celebrations). */
+  dance?: (id: NpcId) => boolean;
+  /** Random ambient chatter bubbles (default on). */
+  ambient?: () => boolean;
+  /** Called once per frame before drawing, with seconds since the last frame. */
+  tick?: (dt: number) => void;
+  /** Extra world-space drawing: behind people, in front of people, and above the lighting. */
+  drawWorld?: (ctx: CanvasRenderingContext2D, t: number) => void;
+  drawFront?: (ctx: CanvasRenderingContext2D, t: number) => void;
+  drawTop?: (ctx: CanvasRenderingContext2D, t: number) => void;
 }
 
 export type Pick = { kind: 'npc'; id: NpcId } | { kind: 'obj'; id: ObjId };
 
 interface Floater { x: number; y: number; text: string; color: string; t0: number }
-interface Bubble { npc: NpcId; text: string; t0: number }
+interface Bubble { npc: NpcId | 'player'; text: string; t0: number; dur: number; big: boolean }
 
 const AMBIENT: Record<NpcId, { day: string[]; dark: string[] }> = {
   chief: { day: ['Order is order!', 'Who left this gate open?', 'In 1994...'], dark: ['This darkness is an insult.', 'NEPA, I greet you.'] },
@@ -66,6 +79,13 @@ export class Scene {
   selected: Pick | null = null;
   highlight: string | null = null;
   player = { x: 820, y: 540, tx: 820, ty: 540, facing: 1 as 1 | -1, cb: null as null | (() => void) };
+  /** Hide the player character (cutscenes). */
+  hidePlayer = false;
+  /** World point to mark with a bouncing arrow ("tap here"). */
+  pointAt: { x: number; y: number } | null = null;
+  /** On narrow screens, centre the camera here instead of on the player. */
+  focusX: number | null = null;
+  private lastFrame = performance.now();
   running = false;
   private cssW = 0;
 
@@ -74,7 +94,8 @@ export class Scene {
     const { s } = this.view;
     const worldW = W * s;
     if (worldW <= this.cssW + 1) return;
-    const target = Math.min(0, Math.max(this.cssW - worldW, this.cssW / 2 - this.player.x * s));
+    const fx = this.focusX ?? this.player.x;
+    const target = Math.min(0, Math.max(this.cssW - worldW, this.cssW / 2 - fx * s));
     this.view.ox = snap ? target : this.view.ox + (target - this.view.ox) * 0.12;
   }
 
@@ -129,6 +150,7 @@ export class Scene {
   }
 
   npcPos(id: NpcId): { x: number; y: number } | null {
+    if (this.deps.npcPos) return this.deps.npcPos(id);
     const w = this.deps.where(id);
     return w.status === 'here' ? SPOTS[w.spot] : null;
   }
@@ -170,6 +192,11 @@ export class Scene {
     return { x: p.x + side * 62, y: p.y + 6 };
   }
 
+  /** Show a speech bubble over a resident (or the player) for `secs` seconds. */
+  say(who: NpcId | 'player', text: string, secs = 3.2): void {
+    this.bubble = { npc: who, text, t0: (performance.now() - this.t0) / 1000, dur: secs, big: true };
+  }
+
   float(x: number, y: number, text: string, tone: 'good' | 'bad' | 'neutral'): void {
     const color = tone === 'good' ? '#3ddc84' : tone === 'bad' ? '#ff6b6b' : '#ffe08a';
     const stack = this.floaters.filter((f) => performance.now() - f.t0 < 600).length;
@@ -183,6 +210,8 @@ export class Scene {
     const t = (now - this.t0) / 1000;
     const s = this.deps.getState();
     const ctx = this.ctx;
+    this.deps.tick?.(Math.min(0.1, (now - this.lastFrame) / 1000));
+    this.lastFrame = now;
 
     // Walk
     const p = this.player;
@@ -216,8 +245,11 @@ export class Scene {
     this.drawSky(hour, t);
     if (this.base) ctx.drawImage(this.base, 0, 0, W, H);
     if (s) this.drawDynamic(s, t);
+    this.deps.drawWorld?.(ctx, t);
     this.drawPeople(s, t, dist > 1, powered);
+    this.deps.drawFront?.(ctx, t);
     if (s) this.drawLighting(dark, powered, t);
+    this.deps.drawTop?.(ctx, t);
     ctx.restore();
 
     // Screen-space overlays (labels, markers, bubbles, floaters) for legible text at any size.
@@ -319,7 +351,7 @@ export class Scene {
     if (s.stats.fuel > 0) drawJerrycan(ctx, 1062, 668, '#e1b12c');
 
     // Laundry
-    drawLaundry(ctx, t, !flag(s, 'shirt_back') && flag(s, 'laundry_case'));
+    drawLaundry(ctx, t, !flag(s, 'shirt_back') && flag(s, 'laundry_case'), s.counters['laundry_taken'] ?? 0);
 
     // Refuse pile
     if (flag(s, 'refuse_pile') && !flag(s, 'waste_settled')) {
@@ -350,7 +382,7 @@ export class Scene {
         const pos = this.npcPos(id);
         if (!pos) continue;
         const sel = this.selected?.kind === 'npc' && this.selected.id === id;
-        const dance = id === 'tobi' && (night || s.hour >= 17) && (powered || night) && !flag(s, 'tobi_headphones');
+        const dance = this.deps.dance ? this.deps.dance(id) : id === 'tobi' && (night || s.hour >= 17) && (powered || night) && !flag(s, 'tobi_headphones');
         const wave = id === 'kemi' && !flag(s, 'met_kemi') && s.day === 1;
         list.push({
           y: pos.y,
@@ -371,7 +403,7 @@ export class Scene {
       }
     }
     const p = this.player;
-    list.push({
+    if (!this.hidePlayer) list.push({
       y: p.y,
       draw: () => {
         const bounce = walking ? Math.abs(Math.sin(t * 12)) * 3 : 0;
@@ -408,7 +440,7 @@ export class Scene {
         const p = this.npcPos(id);
         if (p) lights.push([p.x + 10, p.y - 60, 48 + Math.sin(t * 3 + p.x) * 3]);
       }
-      lights.push([this.player.x + 10, this.player.y - 60, 50]);
+      if (!this.hidePlayer) lights.push([this.player.x + 10, this.player.y - 60, 50]);
     }
     for (const [x, y, r] of lights) {
       const g = ctx.createRadialGradient(x, y, 2, x, y, r);
@@ -434,12 +466,20 @@ export class Scene {
     const small = vs < 0.5;
     const font = small ? 10 : 12;
 
-    if (labels && !small) {
-      for (const [id, b] of Object.entries(OBJ_BOXES) as Array<[ObjId, Box]>) {
-        const sp = this.toScreen(b.ax, b.ay);
-        const isHover = (this.hover?.kind === 'obj' && this.hover.id === id) || this.highlight === id;
-        pill(ctx, sp.x, sp.y, b.label, font, isHover ? '#ffd23f' : 'rgba(20,14,10,0.72)', isHover ? '#1b1410' : '#fff');
+    for (const [id, b] of Object.entries(OBJ_BOXES) as Array<[ObjId, Box]>) {
+      const isHover = (this.hover?.kind === 'obj' && this.hover.id === id) || this.highlight === id;
+      if (this.highlight === id) {
+        // Pulsing outline: "this is the thing to tap".
+        const a = this.toScreen(b.x, b.y), z = this.toScreen(b.x + b.w, b.y + b.h);
+        ctx.strokeStyle = `rgba(255,210,63,${0.55 + Math.sin(t * 6) * 0.35})`;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.roundRect(a.x - 4, a.y - 4, z.x - a.x + 8, z.y - a.y + 8, 10);
+        ctx.stroke();
       }
+      if (!(labels && !small) && !isHover) continue;
+      const sp = this.toScreen(b.ax, b.ay);
+      pill(ctx, sp.x, sp.y, b.label, isHover ? Math.max(font, 13) : font, isHover ? '#ffd23f' : 'rgba(20,14,10,0.72)', isHover ? '#1b1410' : '#fff');
     }
     for (const id of NPC_IDS) {
       const p = this.npcPos(id);
@@ -456,26 +496,44 @@ export class Scene {
     }
 
     // Ambient chatter
-    if (!this.bubble && t > this.nextBubble) {
+    if (!this.bubble && t > this.nextBubble && (this.deps.ambient?.() ?? true)) {
       const here = NPC_IDS.filter((id) => this.npcPos(id) && !(this.selected?.kind === 'npc' && this.selected.id === id));
       if (here.length) {
         const id = here[Math.floor(Math.random() * here.length)];
         const darkNoPower = darkness(s.hour) > 0.3 && !(nepaOn(s) || s.power.genOn);
         const pool = darkNoPower || !nepaOn(s) ? AMBIENT[id].dark : AMBIENT[id].day;
-        this.bubble = { npc: id, text: pool[Math.floor(Math.random() * pool.length)], t0: t };
+        this.bubble = { npc: id, text: pool[Math.floor(Math.random() * pool.length)], t0: t, dur: 3.2, big: false };
       }
       this.nextBubble = t + 6 + Math.random() * 6;
     }
     if (this.bubble) {
-      const age = t - this.bubble.t0;
-      const p = this.npcPos(this.bubble.npc);
-      if (age > 3.2 || !p) this.bubble = null;
+      const b = this.bubble;
+      const age = t - b.t0;
+      const p = b.npc === 'player' ? (this.hidePlayer ? null : this.player) : this.npcPos(b.npc);
+      if (age > b.dur || !p) this.bubble = null;
       else {
-        const sp = this.toScreen(p.x + 40, p.y - (bodyImg(this.bubble.npc) ? SPRITE_H + 20 : 170) * NPCS[this.bubble.npc].look.height);
-        ctx.globalAlpha = Math.min(1, age * 4, (3.2 - age) * 3);
-        speech(ctx, sp.x, sp.y, this.bubble.text, small ? 10 : 12);
+        const tall = b.npc === 'player' ? (bodyImg(this.deps.playerKey()) ? SPRITE_H + 20 : 170) : (bodyImg(b.npc) ? SPRITE_H + 20 : 170) * NPCS[b.npc].look.height;
+        const sp = this.toScreen(p.x + 30, p.y - tall);
+        ctx.globalAlpha = Math.min(1, age * 4, (b.dur - age) * 3);
+        speech(ctx, sp.x, sp.y, b.text, b.big ? (small ? 13 : 16) : small ? 10 : 12, this.cssW);
         ctx.globalAlpha = 1;
       }
+    }
+
+    // "Tap here" arrow
+    if (this.pointAt) {
+      const sp = this.toScreen(this.pointAt.x, this.pointAt.y);
+      const bob = this.deps.settings().reduceMotion ? 0 : Math.abs(Math.sin(t * 5)) * 10;
+      const y = Math.max(34, sp.y - 26 - bob);
+      ctx.fillStyle = '#ffd23f';
+      ctx.strokeStyle = '#1b1410';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(sp.x - 11, y - 30); ctx.lineTo(sp.x + 11, y - 30); ctx.lineTo(sp.x + 11, y - 16);
+      ctx.lineTo(sp.x + 20, y - 16); ctx.lineTo(sp.x, y); ctx.lineTo(sp.x - 20, y - 16); ctx.lineTo(sp.x - 11, y - 16);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
     }
 
     // Floating feedback
@@ -563,15 +621,18 @@ function badge(ctx: CanvasRenderingContext2D, x: number, y: number, small: boole
   ctx.textBaseline = 'alphabetic';
 }
 
-function speech(ctx: CanvasRenderingContext2D, x: number, y: number, text: string, size: number) {
+function speech(ctx: CanvasRenderingContext2D, x: number, y: number, text: string, size: number, maxX = Infinity) {
   ctx.font = `600 ${size}px system-ui, sans-serif`;
   const w = ctx.measureText(text).width + 16;
   const h = size + 12;
+  // Keep the bubble on screen; the tail stays on the speaker.
+  const shift = Math.max(0, x - 8 + w - (maxX - 6));
+  const bx = Math.max(6, x - 8 - shift);
   ctx.fillStyle = '#fffaf0';
   ctx.strokeStyle = '#24150e';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.roundRect(x - 8, y - h, w, h, 8);
+  ctx.roundRect(bx, y - h, w, h, 8);
   ctx.moveTo(x + 2, y);
   ctx.lineTo(x - 8, y + 8);
   ctx.lineTo(x + 12, y);
@@ -579,7 +640,7 @@ function speech(ctx: CanvasRenderingContext2D, x: number, y: number, text: strin
   ctx.stroke();
   ctx.fillStyle = '#24150e';
   ctx.textAlign = 'left';
-  ctx.fillText(text, x, y - 6 - (h - size - 12) / 2);
+  ctx.fillText(text, bx + 8, y - 6 - (h - size - 12) / 2);
 }
 
 // Window positions (top-left) used for the night glow.
@@ -770,13 +831,13 @@ function chair(ctx: CanvasRenderingContext2D, x: number, y: number, c: string) {
   ctx.fillRect(x - 20, y - 22, 5, 22); ctx.fillRect(x + 15, y - 22, 5, 22);
 }
 
-function drawJerrycan(ctx: CanvasRenderingContext2D, x: number, y: number, c: string) {
+export function drawJerrycan(ctx: CanvasRenderingContext2D, x: number, y: number, c: string) {
   ctx.fillStyle = c; ctx.strokeStyle = '#24150e'; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.roundRect(x, y - 30, 22, 30, 3); ctx.fill(); ctx.stroke();
   ctx.fillRect(x + 4, y - 36, 8, 6);
 }
 
-function drawGenerator(ctx: CanvasRenderingContext2D, x: number, y: number, running: boolean) {
+export function drawGenerator(ctx: CanvasRenderingContext2D, x: number, y: number, running: boolean) {
   ctx.fillStyle = '#f1c40f'; ctx.strokeStyle = '#24150e'; ctx.lineWidth = 2.5;
   ctx.beginPath(); ctx.roundRect(x, y, 116, 70, 8); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#2d3436'; ctx.fillRect(x + 10, y + 14, 46, 40);
@@ -790,17 +851,22 @@ function drawGenerator(ctx: CanvasRenderingContext2D, x: number, y: number, runn
   ctx.beginPath(); ctx.moveTo(x - 12, y - 24); ctx.lineTo(x + 130, y - 24); ctx.stroke();
 }
 
-function drawLaundry(ctx: CanvasRenderingContext2D, t: number, missingShirt: boolean) {
+/** Clothes on the line: [x, width, height, colour, kind]. Exported so Story Mode can hit-test them. */
+export const LAUNDRY_ITEMS: Array<[number, number, number, string, string]> = [
+  [418, 26, 40, '#e67e22', 'wax'], [450, 30, 46, '#27ae60', 'shirt'], [488, 24, 30, '#ecf0f1', 'sock'],
+  [516, 30, 52, '#8e44ad', 'wax'], [552, 28, 42, '#c0392b', 'shirt'], [584, 16, 24, '#2980b9', 'sock'],
+];
+export const laundryY = (x: number) => 440 + Math.sin(((x - 401) / 206) * Math.PI) * 11;
+
+/** `taken` is a bitmask of items already taken down. */
+function drawLaundry(ctx: CanvasRenderingContext2D, t: number, missingShirt: boolean, taken = 0) {
   ctx.strokeStyle = '#2d3436'; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.moveTo(401, 440); ctx.quadraticCurveTo(505, 462, 607, 440); ctx.stroke();
-  const items: Array<[number, number, number, string, string]> = [
-    [418, 26, 40, '#e67e22', 'wax'], [450, 30, 46, '#27ae60', 'shirt'], [488, 24, 30, '#ecf0f1', 'sock'],
-    [516, 30, 52, '#8e44ad', 'wax'], [552, 28, 42, missingShirt ? '' : '#c0392b', 'shirt'], [584, 16, 24, '#2980b9', 'sock'],
-  ];
-  for (const [x, w, h, c, kind] of items) {
-    const ly = 440 + Math.sin(((x - 401) / 206) * Math.PI) * 11;
+  LAUNDRY_ITEMS.forEach(([x, w, h, c0, kind], i) => {
+    const c = (i === 4 && missingShirt) || taken & (1 << i) ? '' : c0;
+    const ly = laundryY(x);
     ctx.fillStyle = '#f1c40f'; ctx.fillRect(x + w / 2 - 2, ly - 4, 4, 8);
-    if (!c) continue;
+    if (!c) return;
     const sw = Math.sin(t * 1.6 + x) * 3;
     ctx.save();
     ctx.translate(x, ly);
@@ -815,7 +881,7 @@ function drawLaundry(ctx: CanvasRenderingContext2D, t: number, missingShirt: boo
       if (kind === 'wax') { ctx.fillStyle = 'rgba(255,255,255,0.45)'; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.arc(6 + (i % 2) * 12, 8 + i * 7, 3, 0, Math.PI * 2); ctx.fill(); } }
     }
     ctx.restore();
-  }
+  });
 }
 
 function drawRailing(ctx: CanvasRenderingContext2D) {
@@ -825,7 +891,7 @@ function drawRailing(ctx: CanvasRenderingContext2D) {
   for (let x = 384; x < 1020; x += 16) ctx.fillRect(x, 260, 4, 30);
 }
 
-function drawGoat(ctx: CanvasRenderingContext2D, x: number, y: number, t: number) {
+export function drawGoat(ctx: CanvasRenderingContext2D, x: number, y: number, t: number) {
   const bob = Math.sin(t * 5) * 1.5;
   ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.beginPath(); ctx.ellipse(x, y, 34, 7, 0, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = '#24150e'; ctx.lineWidth = 2;

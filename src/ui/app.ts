@@ -19,7 +19,7 @@ import { hints, markers } from './hints.ts';
 import { renderLines } from './lines.ts';
 import { runMeetingUI } from './meeting.ts';
 import { choiceButton, closeTopModal, confirmDialog, modalOpen, openModal, topModal, trapFocus } from './modal.ts';
-import { openPauseMenu, runTutorial, showResults, showTitle } from './screens.ts';
+import { openPauseMenu, runTutorial, settingsModal, showResults, showTitle, weekMenu } from './screens.ts';
 
 type PanelMode =
   | { kind: 'home' }
@@ -38,6 +38,8 @@ export class App {
   private sleepRequested = false;
   private portraitCache = new Map<string, HTMLCanvasElement>();
   private panelKey = '';
+  /** Story Mode (set in main.ts). */
+  story: { leave(): void; playNext(): void; showMap(): void } | null = null;
 
   constructor() {
     this.applySettings();
@@ -95,6 +97,7 @@ export class App {
   start(game: Game): void {
     this.game = game;
     this.panel = { kind: 'home' };
+    this.story?.leave();
     for (const id of ['screen-title', 'screen-results']) $('#' + id).hidden = true;
     $('#screen-game').hidden = false;
     this.scene.resize();
@@ -112,6 +115,18 @@ export class App {
     this.game = null;
     $('#screen-game').hidden = true;
     showTitle(this);
+  }
+
+  showTitle(): void {
+    showTitle(this);
+  }
+
+  openSettings(): void {
+    settingsModal(this);
+  }
+
+  weekMenu(): void {
+    weekMenu(this);
   }
 
   save(): void {
