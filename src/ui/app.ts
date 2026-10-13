@@ -10,6 +10,7 @@ import {
   describeEffects, drainFeedback, flag, fmtHour, naira, phaseOf, powerLabel, STAT_LABEL, trustTier,
 } from '../engine/state.ts';
 import { drawPortrait } from '../render/people.ts';
+import { drawFace, type CharKey } from '../render/sprites.ts';
 import { OBJ_BOXES, Scene } from '../render/scene.ts';
 import { DAY_END, LAST_DAY, NPC_IDS } from '../types.ts';
 import type { Line, NpcId, StatKey } from '../types.ts';
@@ -45,6 +46,7 @@ export class App {
       getState: () => this.game?.s ?? null,
       where: (id) => this.game!.npcWhere(id),
       playerLook: () => PLAYER_LOOKS[this.game?.s.counters['look'] ?? 0] ?? PLAYER_LOOKS[0],
+      playerKey: () => `player${this.game?.s.counters['look'] ?? 0}` as CharKey,
       markers: () => (this.game ? markers(this.game) : new Set()),
       settings: () => this.settings,
     });
@@ -387,7 +389,8 @@ export class App {
     if (!c) {
       c = h('canvas', { width: size * 2, height: size * 2, class: 'portrait', style: `width:${size}px;height:${size}px`, 'aria-hidden': 'true' });
       const look = id === 'you' ? PLAYER_LOOKS[this.game?.s.counters['look'] ?? 0] : NPCS[id].look;
-      drawPortrait(c, look, id === 'you' ? '#d6ecff' : PORTRAIT_BG[id]);
+      const key = (id === 'you' ? `player${this.game?.s.counters['look'] ?? 0}` : id) as CharKey;
+      if (!drawFace(c, key)) drawPortrait(c, look, id === 'you' ? '#d6ecff' : PORTRAIT_BG[id]);
       if (id !== 'you') this.portraitCache.set(key, c);
       return c;
     }

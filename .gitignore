@@ -4,3 +4,5 @@ dist/
 tests/screens/
 tests/e2e-mobile.png
 *.log
+/art/raw/
+/art/gen.log

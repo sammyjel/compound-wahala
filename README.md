@@ -31,6 +31,8 @@ npm run build && cd dist && touch .nojekyll && git init -q -b gh-pages && git ad
 
 **Music:** original Suno tracks (made by Samuel) in `public/music/`, compressed to 112 kbps; the win/lose stings are 9-second cuts. The game works without them, and Music has its own toggle and volume in Settings.
 
+**Characters:** photoreal portraits of fictional people, generated locally with Z-Image Turbo (Pinokio / Wan2GP) by `art/gen.py`, then cut out with rembg (`art/process.py`) into `public/chars/` (328 KB total). To regenerate one: run `art/gen.py <id>` with the Pinokio venv python, pick a take in `art/picks.json`, then run `art/process.py`. The vector characters in `src/render/people.ts` remain as a fallback.
+
 ## Controls
 
 | Action | Mouse / touch | Keyboard |

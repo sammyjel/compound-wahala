@@ -7,6 +7,10 @@ import { flag, nepaOn } from '../engine/state.ts';
 import type { GameState, Look, NpcId } from '../types.ts';
 import { NPC_IDS } from '../types.ts';
 import { drawPerson } from './people.ts';
+import { bodyImg, drawSprite, type CharKey } from './sprites.ts';
+
+/** World height of a photo character (feet to top of head). */
+const SPRITE_H = 176;
 
 export const W = 1280;
 export const H = 720;
@@ -29,6 +33,7 @@ export interface SceneDeps {
   getState: () => GameState | null;
   where: (id: NpcId) => NpcWhere;
   playerLook: () => Look;
+  playerKey: () => CharKey;
   markers: () => Set<string>;
   settings: () => { labels: boolean; reduceMotion: boolean };
 }
@@ -102,8 +107,9 @@ export class Scene {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     this.canvas.width = Math.max(1, Math.round(r.width * dpr));
     this.canvas.height = Math.max(1, Math.round(r.height * dpr));
-    // Wider than 16:9 → letterbox. Narrower (phones) → fill the height and pan with the player.
-    const s = r.width / r.height >= W / H ? r.height / H : Math.max(r.width / W, r.height / H);
+    // Desktop → show the whole compound. Narrow phones → fill the height and pan with the player.
+    const phone = r.width < 700 && r.width / r.height < W / H;
+    const s = phone ? Math.max(r.width / W, r.height / H) : Math.min(r.width / W, r.height / H);
     this.view = { s, ox: (r.width - W * s) / 2, oy: (r.height - H * s) / 2, dpr };
     this.cssW = r.width;
     this.updateCamera(true);
@@ -132,7 +138,7 @@ export class Scene {
       .filter((n): n is { id: NpcId; p: { x: number; y: number } } => !!n.p)
       .sort((a, b) => b.p.y - a.p.y);
     for (const n of npcs) {
-      const h = 140 * 1.0;
+      const h = bodyImg(n.id) ? SPRITE_H : 140;
       if (x > n.p.x - 32 && x < n.p.x + 32 && y > n.p.y - h && y < n.p.y + 8) return { kind: 'npc', id: n.id };
     }
     for (const [id, b] of Object.entries(OBJ_BOXES) as Array<[ObjId, Box]>) {
@@ -351,6 +357,11 @@ export class Scene {
           balcony: pos.y < 400,
           draw: () => {
             if (sel || this.highlight === id) ring(ctx, pos.x, pos.y, t);
+            const img = bodyImg(id);
+            if (img) {
+              drawSprite(ctx, img, pos.x, pos.y, { t, phase: id.length * 1.7, talking: sel, dance, height: SPRITE_H * NPCS[id].look.height });
+              return;
+            }
             drawPerson(ctx, pos.x, pos.y, 1, NPCS[id].look, {
               t, phase: id.length * 1.7, talking: sel, dance, wave, facing: pos.x > this.player.x ? -1 : 1,
               sleepy: id === 'amaka' && s.hour < 9,
@@ -364,9 +375,12 @@ export class Scene {
       y: p.y,
       draw: () => {
         const bounce = walking ? Math.abs(Math.sin(t * 12)) * 3 : 0;
-        drawPerson(ctx, p.x, p.y - bounce, 1, this.deps.playerLook(), { t, facing: p.facing });
+        const img = bodyImg(this.deps.playerKey());
+        if (img) drawSprite(ctx, img, p.x, p.y - bounce, { t, height: SPRITE_H });
+        else drawPerson(ctx, p.x, p.y - bounce, 1, this.deps.playerLook(), { t, facing: p.facing });
+        const top = p.y - (img ? SPRITE_H + 14 : 168);
         ctx.fillStyle = '#ffd23f';
-        ctx.beginPath(); ctx.moveTo(p.x - 7, p.y - 168); ctx.lineTo(p.x + 7, p.y - 168); ctx.lineTo(p.x, p.y - 158); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(p.x - 7, top); ctx.lineTo(p.x + 7, top); ctx.lineTo(p.x, top + 10); ctx.closePath(); ctx.fill();
       },
     });
     list.sort((a, b) => a.y - b.y);
@@ -430,7 +444,7 @@ export class Scene {
     for (const id of NPC_IDS) {
       const p = this.npcPos(id);
       if (!p) continue;
-      const sp = this.toScreen(p.x, p.y - 150 * NPCS[id].look.height);
+      const sp = this.toScreen(p.x, p.y - (bodyImg(id) ? SPRITE_H + 8 : 150) * NPCS[id].look.height);
       const isHover = (this.hover?.kind === 'npc' && this.hover.id === id) || this.highlight === id;
       if (labels || isHover) pill(ctx, sp.x, sp.y, NPCS[id].short, font, isHover ? '#ffd23f' : 'rgba(20,14,10,0.78)', isHover ? '#1b1410' : '#ffe9b0');
       if (markers.has(id)) badge(ctx, sp.x + (small ? 26 : 34), sp.y - 6 + Math.sin(t * 4) * 3, small);
@@ -457,7 +471,7 @@ export class Scene {
       const p = this.npcPos(this.bubble.npc);
       if (age > 3.2 || !p) this.bubble = null;
       else {
-        const sp = this.toScreen(p.x + 40, p.y - 170 * NPCS[this.bubble.npc].look.height);
+        const sp = this.toScreen(p.x + 40, p.y - (bodyImg(this.bubble.npc) ? SPRITE_H + 20 : 170) * NPCS[this.bubble.npc].look.height);
         ctx.globalAlpha = Math.min(1, age * 4, (3.2 - age) * 3);
         speech(ctx, sp.x, sp.y, this.bubble.text, small ? 10 : 12);
         ctx.globalAlpha = 1;

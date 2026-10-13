@@ -7,6 +7,7 @@ import { finalResults, Game } from '../engine/game.ts';
 import { deleteSave, loadGame, saveInfo, storageAvailable, type Settings } from '../engine/save.ts';
 import { naira, trustTier } from '../engine/state.ts';
 import { drawPerson, drawPortrait } from '../render/people.ts';
+import { bodyImg, drawFace, drawSprite, type CharKey } from '../render/sprites.ts';
 import { NPC_IDS } from '../types.ts';
 import type { GameState } from '../types.ts';
 import type { App } from './app.ts';
@@ -49,7 +50,9 @@ export function showTitle(app: App): void {
     const order = ['amaka', 'femi', 'chief', 'kemi', 'tobi', 'bisi'] as const;
     order.forEach((id, i) => {
       const x = 170 + i * 172;
-      drawPerson(ctx, x, 400 - (i % 2) * 12, 2.15, NPCS[id].look, { t: t + i, dance: id === 'tobi', wave: id === 'kemi', talking: id === 'chief' && Math.sin(t) > 0 });
+      const img = bodyImg(id);
+      if (img) drawSprite(ctx, img, x, 410 - (i % 2) * 10, { t: t + i, height: 390 * NPCS[id].look.height, dance: id === 'tobi' });
+      else drawPerson(ctx, x, 400 - (i % 2) * 12, 2.15, NPCS[id].look, { t: t + i, dance: id === 'tobi', wave: id === 'kemi', talking: id === 'chief' && Math.sin(t) > 0 });
     });
     t += 0.016;
     requestAnimationFrame(draw);
@@ -83,7 +86,7 @@ async function newGameFlow(app: App): Promise<void> {
     clear(looks);
     PLAYER_LOOKS.forEach((l, i) => {
       const c = h('canvas', { width: 120, height: 120, style: 'width:60px;height:60px', 'aria-hidden': 'true' });
-      drawPortrait(c, l, '#d6ecff');
+      if (!drawFace(c, `player${i}` as CharKey)) drawPortrait(c, l, '#d6ecff');
       looks.append(h('button', { class: 'look' + (i === look ? ' active' : ''), type: 'button', role: 'radio', 'aria-checked': String(i === look), 'aria-label': `Look ${i + 1}`, onclick: () => { look = i; renderLooks(); } }, c));
     });
   };
@@ -268,7 +271,7 @@ export function showResults(app: App, s: GameState): void {
   const r = finalResults(s);
   const portrait = (id: (typeof NPC_IDS)[number]) => {
     const c = h('canvas', { width: 96, height: 96, style: 'width:48px;height:48px', 'aria-hidden': 'true' });
-    drawPortrait(c, NPCS[id].look);
+    if (!drawFace(c, id)) drawPortrait(c, NPCS[id].look);
     return c;
   };
   const meetings = MOTIONS.map((m) => ({ m, rec: s.meetings[m.id] }));
