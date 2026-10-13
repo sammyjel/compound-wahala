@@ -1,0 +1,133 @@
+import type { Look, NpcDef, NpcId } from '../types.ts';
+
+// All residents are fictional. Each one is a person first and a joke second.
+
+export const NPCS: Record<NpcId, NpcDef> = {
+  chief: {
+    id: 'chief',
+    name: 'Chief Ezeugo Okafor',
+    short: 'Chief',
+    role: 'Landlord',
+    room: 'Upstairs, Flat A',
+    bio: 'Retired customs officer who built Unity Compound "block by block". Loves proverbs, order and being greeted properly. Softer than he lets on.',
+    look: {
+      skin: '#7a4a2e', hair: 'low', hairColor: '#cfcfcf', top: '#1d2333', topAccent: '#d4a83a', bottom: '#1d2333',
+      shoes: '#6b1f1f', build: 'round', height: 0.95, acc: ['redcap', 'beads', 'cane', 'grey'],
+    },
+    values: { money: 1, fairness: 1, order: 3, peace: 1, fun: -1, business: 0, respect: 3 },
+    thrift: 0,
+    baseTrust: 50,
+    caresAbout: 'Order, rules and respect. Greet him well and appeal to the good name of the compound.',
+    routine: { morning: 'balcony', afternoon: 'inside', evening: 'chairs', night: 'inside' },
+    payStyle: 'exempt',
+  },
+  kemi: {
+    id: 'kemi',
+    name: 'Aunty Kemi Adebayo',
+    short: 'Aunty Kemi',
+    role: 'Hair braider & unofficial news agency',
+    room: 'Ground floor, Room 3',
+    bio: 'Braids hair in the courtyard and knows everything before it happens. Gossip is her hobby; checking on everybody is her real job.',
+    look: {
+      skin: '#8a5634', hair: 'braids', hairColor: '#1a1110', top: '#7b2fa8', topAccent: '#f2c14e', bottom: '#7b2fa8',
+      shoes: '#2b1b12', build: 'medium', height: 0.98, dress: true, acc: ['headtie', 'phone'],
+    },
+    values: { money: 1, fairness: 1, order: -1, peace: 0, fun: 2, business: 1, respect: 2 },
+    thrift: 1.5,
+    baseTrust: 55,
+    caresAbout: 'Being in the know, a bit of drama, and her standing in the compound. Flattery works; secrets work better.',
+    routine: { morning: 'laundry', afternoon: 'chairs2', evening: 'gate', night: 'courtyard' },
+    payStyle: 'ontime',
+  },
+  amaka: {
+    id: 'amaka',
+    name: 'Nurse Amaka Eze',
+    short: 'Nurse Amaka',
+    role: 'Night-shift nurse',
+    room: 'Ground floor, Room 1',
+    bio: 'Works nights at General Hospital, sleeps in the afternoon, pays every bill the day it lands. Patience: finite.',
+    look: {
+      skin: '#6e3f26', hair: 'puff', hairColor: '#120c0a', top: '#2f9c95', topAccent: '#e8f6f4', bottom: '#2f9c95',
+      shoes: '#f4f4f4', build: 'slim', height: 1.0, acc: [],
+    },
+    values: { money: 1, fairness: 3, order: 1, peace: 3, fun: -2, business: 0, respect: 0 },
+    thrift: 1,
+    baseTrust: 45,
+    caresAbout: 'Fairness and peace and quiet. She wants everyone to pay their share and keep the noise down.',
+    routine: { morning: 'tank', afternoon: 'inside', evening: 'yard', night: 'away' },
+    payStyle: 'early',
+  },
+  femi: {
+    id: 'femi',
+    name: 'Brother Femi Johnson',
+    short: 'Brother Femi',
+    role: '"Entrepreneur" (expecting alert)',
+    room: 'Ground floor, Room 2',
+    bio: 'Always one phone call away from a big deal. Charming, generous with compliments, allergic to contributions.',
+    look: {
+      skin: '#5a3420', hair: 'low', hairColor: '#0e0a08', top: '#e8572a', topAccent: '#f7d046', bottom: '#2c3e66',
+      shoes: '#eeeeee', build: 'slim', height: 1.05, acc: ['shades', 'chain', 'phone'],
+    },
+    values: { money: 3, fairness: -1, order: -2, peace: 0, fun: 2, business: 1, respect: 2 },
+    thrift: 3,
+    baseTrust: 50,
+    caresAbout: 'Saving money and looking good. Anything that costs him must sound like a smart investment.',
+    routine: { morning: 'away', afternoon: 'gate', evening: 'courtyard', night: 'chairs' },
+    payStyle: 'never',
+  },
+  bisi: {
+    id: 'bisi',
+    name: 'Iya Bisi Lawal',
+    short: 'Iya Bisi',
+    role: 'Provisions trader at the gate',
+    room: 'Upstairs, Flat B',
+    bio: 'Runs the kiosk by the gate: fuel, sachet water, noodles, credit for the trustworthy. Business first, but fair.',
+    look: {
+      skin: '#7d4b2c', hair: 'short', hairColor: '#1a1110', top: '#1f8a4c', topAccent: '#f6b93b', bottom: '#1f8a4c',
+      shoes: '#5a3a22', build: 'round', height: 0.97, dress: true, acc: ['headtie', 'apron'],
+    },
+    values: { money: 2, fairness: 1, order: 1, peace: 0, fun: 0, business: 3, respect: 1 },
+    thrift: 1.5,
+    baseTrust: 50,
+    caresAbout: 'Business. Her freezer needs light and her customers need a calm compound. Talk profit.',
+    routine: { morning: 'kiosk', afternoon: 'kiosk', evening: 'kiosk', night: 'inside' },
+    payStyle: 'ontime',
+  },
+  tobi: {
+    id: 'tobi',
+    name: 'Tobi "DJ Tee" Bankole',
+    short: 'Tobi',
+    role: 'Aspiring DJ & skit maker, 19',
+    room: 'Ground floor, Room 5',
+    bio: 'Has a speaker bigger than his savings and 1,200 followers who "really get him". Loud, loyal, secretly very kind.',
+    look: {
+      skin: '#6a3d24', hair: 'afro', hairColor: '#1b120d', top: '#ff5d8f', topAccent: '#ffd23f', bottom: '#3a3f58',
+      shoes: '#f4f4f4', build: 'slim', height: 1.02, acc: ['headphones'],
+    },
+    values: { money: 1, fairness: 1, order: -2, peace: -2, fun: 3, business: 1, respect: 2 },
+    thrift: 2,
+    baseTrust: 55,
+    caresAbout: 'Fun, music and clout. He follows people he trusts and hates rules that sound like his dad.',
+    routine: { morning: 'inside', afternoon: 'courtyard', evening: 'chairs2', night: 'chairs2' },
+    payStyle: 'late',
+  },
+};
+
+export const PLAYER_LOOKS: Look[] = [
+  { skin: '#6b3e25', hair: 'short', hairColor: '#120c0a', top: '#2d6cdf', topAccent: '#ffffff', bottom: '#2a2a35', shoes: '#c94f2c', build: 'medium', height: 1.0, acc: [] },
+  { skin: '#7c4a2b', hair: 'braids', hairColor: '#120c0a', top: '#e0a400', topAccent: '#1f1f1f', bottom: '#2a2a35', shoes: '#ffffff', build: 'slim', height: 0.98, dress: true, acc: [] },
+  { skin: '#5c3520', hair: 'afro', hairColor: '#120c0a', top: '#16a085', topAccent: '#ffffff', bottom: '#34495e', shoes: '#222222', build: 'medium', height: 1.02, acc: ['glasses'] },
+];
+
+/** Where a spot sits in the 1280x720 scene (feet position). */
+export const SPOTS: Record<string, { x: number; y: number }> = {
+  gate: { x: 150, y: 575 },
+  kiosk: { x: 345, y: 520 },
+  laundry: { x: 500, y: 572 },
+  chairs: { x: 640, y: 640 },
+  chairs2: { x: 790, y: 628 },
+  courtyard: { x: 935, y: 590 },
+  tank: { x: 1075, y: 545 },
+  balcony: { x: 560, y: 262 },
+  yard: { x: 455, y: 655 },
+};

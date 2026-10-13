@@ -1,0 +1,22 @@
+{
+  "name": "compound-wahala",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/logic.test.ts",
+    "e2e": "node tests/e2e.mjs",
+    "shots": "node tests/shots.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.48.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vite-plugin-singlefile": "^2.0.3"
+  },
+  "description": "COMPOUND WAHALA: Naija Neighbourhood Wars \u2014 a browser comedy/social-sim about life in a shared Nigerian compound."
+}
