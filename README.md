@@ -21,7 +21,15 @@ npm run preview      # serve the built file
 
 Requires Node 18+ (Node 22.6+ for `npm test`, which runs TypeScript natively).
 
-**Deploying:** upload `dist/index.html` to any static host (GitHub Pages, Netlify, itch.io as an HTML game, etc.). Nothing else is needed.
+**Live:** https://sammyjel.github.io/compound-wahala/
+
+**Deploying:** upload the whole `dist/` folder (`index.html` + `music/`) to any static host. It's currently on GitHub Pages, served from the `gh-pages` branch. To redeploy after changes (Git Bash):
+
+```bash
+npm run build && cd dist && touch .nojekyll && git init -q -b gh-pages && git add -A   && git commit -qm deploy && git push -f https://github.com/sammyjel/compound-wahala.git gh-pages && rm -rf .git
+```
+
+**Music:** original Suno tracks (made by Samuel) in `public/music/`, compressed to 112 kbps; the win/lose stings are 9-second cuts. The game works without them, and Music has its own toggle and volume in Settings.
 
 ## Controls
 
