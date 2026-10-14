@@ -1,4 +1,4 @@
-# Cloudflare Worker + D1 for Compound Wahala analytics (free tier). NOT deployed yet.
+# Cloudflare Worker + D1 for Compound Wahala analytics (free tier). Deployed 2026-10-15 to account 9794c74e…
 # Deploy (needs YOUR Cloudflare account; free plan is enough):
 #   cd growth/analytics
 #   npx wrangler login
@@ -9,6 +9,9 @@
 name = "compound-wahala-analytics"
 main = "worker.mjs"
 compatibility_date = "2026-09-01"
+account_id = "9794c74ef112048eb98876362a82e043"
+workers_dev = true
+preview_urls = false
 
 [vars]
 ALLOWED_ORIGINS = "https://sammyjel.github.io"
@@ -17,4 +20,4 @@ RETENTION_DAYS = "400"
 [[d1_databases]]
 binding = "DB"
 database_name = "compound-wahala-analytics"
-database_id = "REPLACE_WITH_ID_FROM_wrangler_d1_create"
+database_id = "988b14e2-5703-47ab-a4ef-11ba9e89c209"

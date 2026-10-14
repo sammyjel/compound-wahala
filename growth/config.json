@@ -6,11 +6,12 @@
     "autoPublishRoutine": false,
     "_autoPublishRoutine": "false = every item needs your approval in the review queue. true = items from already-approved series publish without asking.",
     "platforms": {
-      "youtube": { "mode": "manual", "_mode": "manual | api (api needs YOUTUBE_* credentials)" },
-      "tiktok": { "mode": "manual" },
-      "instagram": { "mode": "manual" },
-      "facebook": { "mode": "manual" }
+      "youtube": { "mode": "manual", "_mode": "manual | api (api needs YOUTUBE_* credentials)", "account": "PraiseChannel" },
+      "tiktok": { "mode": "manual", "account": "Dispatch Channel" },
+      "instagram": { "mode": "manual", "account": "@biggysammyjel" },
+      "facebook": { "mode": "manual", "account": "Psalmist Sammyjel" }
     },
+    "_account": "Which of your accounts to post from (names only, never passwords).",
     "maxRetries": 3
   },
   "workflows": {

@@ -55,7 +55,7 @@ export async function run({ dry = false, now = Date.now() } = {}) {
       } else {
         const why = mode === 'api' ? `${platform} API not configured or not supported` : 'manual mode';
         if (dry) { done.push(`${item.id}/${platform}: would create manual task (${why})`); continue; }
-        const file = manualTask(item, platform, why);
+        const file = manualTask(item, platform, why, cfg.publishing.platforms?.[platform]?.account);
         const m = queue.get(item.id);
         m.platforms[platform] = { ...st, status: 'manual_task', task: file, note: why };
         queue.save(m);
@@ -89,7 +89,7 @@ async function withRetries(fn, max) {
 }
 
 /** A checklist you can follow on your phone: what to upload, the caption, and where to record the URL. */
-function manualTask(item, platform, why) {
+function manualTask(item, platform, why, account) {
   mkdirSync(TASKS, { recursive: true });
   const c = item.copy.platforms[platform];
   const f = join(TASKS, `${item.id}-${platform}.md`);
@@ -104,6 +104,7 @@ function manualTask(item, platform, why) {
   writeFileSync(f, [
     `# Post "${item.title}" on ${platform}`,
     '',
+    ...(account ? [`Account: ${account}`] : []),
     `When: ${item.scheduleAt.replace('T', ' ').slice(0, 16)} UTC (${why})`,
     `Video: ${join(queue.dir(item.id), item.files.video)}`,
     `Thumbnail: ${join(queue.dir(item.id), item.files.thumb)}`,

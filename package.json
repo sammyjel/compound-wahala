@@ -19,7 +19,8 @@
     "growth:report": "node growth/marketing/report.mjs",
     "growth:test": "node --test growth/tests/analytics.test.mjs growth/tests/workflow.test.mjs growth/tests/report.test.mjs growth/tests/payments.test.mjs",
     "growth:store-e2e": "node growth/tests/store-e2e.mjs",
-    "growth:integration": "node growth/tests/integration.mjs"
+    "growth:integration": "node growth/tests/integration.mjs",
+    "growth:live-check": "node tests/live-analytics.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.48.2",

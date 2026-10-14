@@ -58,10 +58,10 @@ Ready now: responsive layout (tested 390 px phone → desktop), web app manifest
 
 | Integration | Status |
 |---|---|
-| Simplified game (Story Mode) | **Working locally**, tested; not yet deployed (waiting for your OK) |
-| Landing page, privacy, feedback, manifest | **Working locally**, not deployed |
-| Analytics client + consent + delete | **Working** (tested end-to-end against local server); endpoint not set in the public build |
-| Analytics Worker (Cloudflare) | **Ready, awaiting your Cloudflare account** |
+| Simplified game (Story Mode) | **Live** (deployed 2026-10-14) |
+| Landing page, privacy, feedback, manifest | **Live** |
+| Analytics client + consent + delete | **Live** (2026-10-15): opt-in events reach the Worker; verified by `npm run growth:live-check` |
+| Analytics Worker (Cloudflare) | **Live, free tier**: https://compound-wahala-analytics.sammyjel.workers.dev (D1 `compound-wahala-analytics`) |
 | Dashboard | **Working** on local server; shows real data only |
 | Content generation (A) | **Working** — 7 real drafts in the review queue now |
 | Review queue | **Working** |
@@ -77,9 +77,9 @@ Ready now: responsive layout (tested 390 px phone → desktop), web app manifest
 
 ## What I need from you (in order)
 
-1. **OK to redeploy** the live site with Story Mode + landing page (free, GitHub Pages).
-2. Cloudflare account (free) → deploy analytics (steps in `growth/analytics/wrangler.toml`), or tell me to do it with you.
+1. ~~OK to redeploy~~ — done.
+2. ~~Cloudflare account~~ — done 2026-10-15.
 3. Watch the 7 draft videos at `/review`; approve the ones you like.
-4. Which social accounts to use (TikTok, YouTube, Instagram, Facebook Page) — handles only, never passwords.
+4. ~~Which social accounts~~ — given 2026-10-15 (in `growth/config.json` → `account`): YouTube PraiseChannel, Facebook Psalmist Sammyjel, Instagram @biggysammyjel, TikTok Dispatch Channel (need its @username).
 5. Optional: Google Cloud OAuth client for YouTube API; ntfy topic for phone alerts.
 6. Later, only if you decide: AdSense, Paystack (business verification), Play Console.
