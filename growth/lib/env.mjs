@@ -18,7 +18,7 @@ export function loadEnv(file = join(GROWTH, '.env')) {
   for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
     const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
     if (!m || line.trim().startsWith('#')) continue;
-    const v = m[2].replace(/^["']|["']$/g, '');
+    const v = m[2].replace(/(^|\s+)#.*$/, '').trim().replace(/^["']|["']$/g, '');
     if (process.env[m[1]] === undefined) process.env[m[1]] = v;
   }
 }
