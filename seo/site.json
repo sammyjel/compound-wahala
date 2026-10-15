@@ -1,0 +1,102 @@
+{
+  "_readme": "Single source of truth for SEO. `npm run build` runs scripts/seo.mjs, which writes titles, meta, social cards, JSON-LD, level pages, the Pidgin glossary, sitemap.xml and the 404 page from this file + the real level data in src/story/levels.ts. Only state facts that are true in the game.",
+  "siteUrl": "https://sammyjel.github.io/compound-wahala/",
+  "name": "Compound Wahala",
+  "alternateName": "Compound Wahala: Naija Neighbourhood Wars",
+  "locale": "en_NG",
+  "lang": "en",
+  "themeColor": "#1f6f50",
+  "ogImage": "media/og/title.jpg",
+  "ogImageAlt": "Compound Wahala title screen: six Nigerian neighbours above a big PLAY button",
+  "datePublished": "2026-10-13",
+  "author": "Samuel (sammyjel)",
+  "genre": ["Casual", "Comedy", "Puzzle", "Simulation"],
+  "audience": "Children 7+ and families",
+  "inLanguage": ["en", "pcm"],
+  "keywords": ["Nigerian game", "Naija game online", "free Nigerian browser game", "Nigerian comedy game", "NEPA game", "game for Nigerian kids", "Pidgin English game", "African games for kids", "compound life Nigeria", "play free online no download"],
+  "_verification": "Paste the content value of the meta tag Google Search Console / Bing Webmaster Tools gives you (HTML tag method). Empty = not added.",
+  "verification": { "google": "", "bing": "" },
+  "_sameAs": "Public profile URLs of the game's own accounts. Leave empty until you confirm which accounts represent the game.",
+  "sameAs": [],
+  "pages": {
+    "index.html": {
+      "title": "Play Compound Wahala — Free Nigerian Comedy Game (No Download)",
+      "description": "Play free in your browser: fix funny problems in a busy Nigerian compound. NEPA blackouts, a missing bucket, rain on the laundry and a hungry goat. Works on phones.",
+      "image": "media/og/level-1.jpg",
+      "imageAlt": "Level 1: the generator has no fuel. Three big choices: Find fuel, Start generator, Call the electrician",
+      "priority": "1.0"
+    },
+    "home.html": {
+      "title": "Compound Wahala · Free Nigerian Comedy Game for Kids & Families",
+      "description": "A free, funny Nigerian browser game: 5 short levels about NEPA blackouts, buckets, rain, a goat and fuel palaver, then a 7-day Full Week challenge. English + Pidgin.",
+      "priority": "0.9"
+    },
+    "pidgin.html": {
+      "title": "Naija Pidgin Words & Phrases (With Meanings) · Compound Wahala",
+      "description": "What do wahala, NEPA don take light, chop, abeg and palaver mean? Nigerian Pidgin words and phrases from the game, with plain English meanings.",
+      "priority": "0.7"
+    },
+    "privacy.html": {
+      "title": "Privacy · Compound Wahala",
+      "description": "Compound Wahala collects no names or emails. Anonymous play statistics only if you say yes, and you can delete them any time.",
+      "priority": "0.3"
+    },
+    "feedback.html": {
+      "title": "Feedback & Bug Reports · Compound Wahala",
+      "description": "Found a bug or have an idea for Compound Wahala? Tell us here.",
+      "priority": "0.3"
+    }
+  },
+  "levels": {
+    "1": {
+      "story": "The light goes off in Unity Compound and everyone starts shouting. The generator needs fuel before it can run, so you have to work out the right order: find fuel at Iya Bisi's kiosk, then pull the starter rope until the generator roars back to life.",
+      "skills": ["Doing things in the right order", "Trying again after a funny mistake"],
+      "fact": "In Nigeria, \"NEPA\" is still what many people call the electricity company, even though the old National Electric Power Authority was renamed years ago. \"NEPA don take light!\" means \"The power is out!\""
+    },
+    "2": {
+      "story": "Nurse Amaka's blue bucket has disappeared and she needs water before work. Search the compound: the gate, the kiosk, the laundry line, the water tank and more. Listen to Aunty Kemi's clue, find who borrowed the bucket, fill it at the tank and hand it back.",
+      "skills": ["Searching and listening for clues", "Helping a neighbour"],
+      "fact": "Many compounds share one big water tank, so a bucket is precious. Borrowing one without asking is a classic compound wahala."
+    },
+    "3": {
+      "story": "Dark clouds are rolling in and Aunty Kemi's washing is still on the line. Tap all six clothes before the rain arrives. Be quick: thunder is coming!",
+      "skills": ["Quick tapping and reaction time", "Beating a gentle timer"],
+      "fact": "\"Rain dey come!\" is Pidgin for \"Rain is coming!\" — the warning shout that sends a whole compound running for the laundry."
+    },
+    "4": {
+      "story": "The last piece of meat is missing from the pot. Interview the three suspects — Brother Femi, Tobi and Aunty Kemi — look at the clues, and name the real thief. (It is not who you think.)",
+      "skills": ["Listening to different stories", "Using clues to reach an answer"],
+      "fact": "\"Who chop the meat?\" means \"Who ate the meat?\" In Pidgin, \"chop\" means to eat."
+    },
+    "5": {
+      "story": "The generator fuel has run out and neighbours are arguing about who should pay. Brother Femi used his fan for one hour; Iya Bisi ran her freezer for ten. Listen to both sides, then help Chief call a fair vote.",
+      "skills": ["Hearing both sides", "Fairness and agreeing together"],
+      "fact": "\"Palaver\" means a long argument or trouble. A \"fuel palaver\" is a fight about sharing generator fuel costs — very common in shared compounds."
+    }
+  },
+  "glossary": [
+    { "term": "Wahala", "meaning": "Trouble, stress or a big fuss. \"Compound wahala\" = drama in the compound.", "example": "No wahala! (No problem!)" },
+    { "term": "NEPA", "meaning": "What many Nigerians still call the electricity company. Used for the power supply itself.", "example": "NEPA don take light! (The power is out!)" },
+    { "term": "Don", "meaning": "Shows that something has happened (like \"has\").", "example": "Light don come! (The power is back!)" },
+    { "term": "Dey", "meaning": "Is / are / is happening.", "example": "Rain dey come! (Rain is coming!)" },
+    { "term": "Chop", "meaning": "To eat. Also food.", "example": "Who chop the meat? (Who ate the meat?)" },
+    { "term": "Abeg", "meaning": "Please.", "example": "Abeg, help me find am! (Please help me find it!)" },
+    { "term": "Am", "meaning": "Him, her or it (after a verb).", "example": "I dey sell am. (I sell it.)" },
+    { "term": "Na", "meaning": "It is / it's (points at something).", "example": "Na me? (Is it me?)" },
+    { "term": "Wetin", "meaning": "What.", "example": "Wetin happen? (What happened?)" },
+    { "term": "Palaver", "meaning": "A long argument or trouble.", "example": "Fuel palaver (an argument about fuel)" },
+    { "term": "Ahn ahn!", "meaning": "A shout of surprise or protest, like \"Ah! Come on!\"", "example": "Ahn ahn! NEPA don take light again!" },
+    { "term": "O", "meaning": "Added at the end of a sentence for emphasis.", "example": "Me I hear drumming o!" },
+    { "term": "Compound", "meaning": "A shared yard with several homes around it, where neighbours share a gate, water tank and often a generator.", "example": "Unity Compound, 7 Adebayo Close" },
+    { "term": "Owambe", "meaning": "A big, colourful Nigerian party (especially Yoruba celebrations).", "example": "The compound looks like an owambe!" }
+  ],
+  "faq": [
+    { "q": "Is Compound Wahala free?", "a": "Yes. The whole game is free to play in your browser. There are no ads and nothing to buy." },
+    { "q": "Do I need to download anything?", "a": "No. Open the link and tap PLAY. It works in Chrome, Safari, Edge and Firefox, on phones and computers. You can add it to your home screen to open it like an app." },
+    { "q": "What age is it for?", "a": "It is made for children from about 7 and for families. Every level uses big buttons, short sentences, and wrong answers are funny instead of punished." },
+    { "q": "Is it safe for children?", "a": "There is no chat, no accounts, no ads and no purchases. Anonymous play statistics are only collected if you say yes, and you can delete them in Settings." },
+    { "q": "What language is the game in?", "a": "English with Nigerian Pidgin. Pidgin lines show a plain English version underneath, so players who don't speak Pidgin can follow along." },
+    { "q": "How long does it take?", "a": "Each of the 5 story levels takes a few minutes. After that, Full Week mode is a longer 7-day challenge with bills, blackouts and compound meetings." },
+    { "q": "Is it a true story?", "a": "No. All characters and places are fictional, and the character art is AI-generated. The problems are inspired by everyday life in Nigerian compounds." }
+  ]
+}

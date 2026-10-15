@@ -12,3 +12,5 @@ growth/.env
 growth/data/
 growth/content/queue/
 growth/content/INBOX.md
+seo/.pinged.json
+seo/.shots/

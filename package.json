@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "postbuild": "node --experimental-strip-types scripts/seo.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test tests/logic.test.ts tests/story.test.ts",
@@ -20,7 +21,11 @@
     "growth:test": "node --test growth/tests/analytics.test.mjs growth/tests/workflow.test.mjs growth/tests/report.test.mjs growth/tests/payments.test.mjs",
     "growth:store-e2e": "node growth/tests/store-e2e.mjs",
     "growth:integration": "node growth/tests/integration.mjs",
-    "growth:live-check": "node tests/live-analytics.mjs"
+    "growth:live-check": "node tests/live-analytics.mjs",
+    "seo:shots": "node scripts/seo-shots.mjs",
+    "seo:check": "node --experimental-strip-types scripts/seo.mjs --check",
+    "seo:ping": "node scripts/seo-ping.mjs",
+    "test:seo": "node --experimental-strip-types --test tests/seo.test.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.48.2",
