@@ -25,7 +25,9 @@
     "seo:shots": "node scripts/seo-shots.mjs",
     "seo:check": "node --experimental-strip-types scripts/seo.mjs --check",
     "seo:ping": "node scripts/seo-ping.mjs",
-    "test:seo": "node --experimental-strip-types --test tests/seo.test.mjs"
+    "test:seo": "node --experimental-strip-types --test tests/seo.test.mjs",
+    "portal:crazygames": "node scripts/portal-build.mjs crazygames",
+    "portal:test": "node tests/portal.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.48.2",

@@ -13,6 +13,8 @@ let unlocked = false;
 let wanted: Track | null = null;
 let current: { name: Track; el: HTMLAudioElement } | null = null;
 let ducked = false;
+/** Hard mute while a portal ad plays; does not touch the player's own sound settings. */
+let adMuted = false;
 
 function src(name: string): string {
   return `music/${name}.mp3`;
@@ -31,7 +33,7 @@ function fade(el: HTMLAudioElement, to: number, ms: number, done?: () => void): 
 }
 
 function target(): number {
-  return enabled ? volume * (ducked ? 0.25 : 1) : 0;
+  return enabled && !adMuted ? volume * (ducked ? 0.25 : 1) : 0;
 }
 
 function start(name: Track): void {
@@ -58,7 +60,7 @@ export function playMusic(name: Track): void {
 }
 
 export function sting(name: Sting): void {
-  if (!enabled || !unlocked || volume <= 0) return;
+  if (!enabled || adMuted || !unlocked || volume <= 0) return;
   const el = new Audio(src(name));
   el.volume = Math.min(1, volume * 1.2);
   ducked = true;
@@ -92,4 +94,11 @@ export function unlockMusic(): void {
   if (unlocked) return;
   unlocked = true;
   if (wanted) start(wanted);
+}
+
+/** Silence music for an ad break (true) and bring it back afterwards (false). */
+export function muteForAd(on: boolean): void {
+  adMuted = on;
+  if (!current) return;
+  if (on) { current.el.volume = 0; current.el.pause(); } else { void current.el.play().catch(() => {}); fade(current.el, target(), 600); }
 }

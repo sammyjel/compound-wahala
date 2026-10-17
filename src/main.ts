@@ -1,6 +1,7 @@
 import { recent, startSession, track } from './analytics.ts';
 import { unlockMusic } from './audio/music.ts';
 import { initAds } from './monetize/ads.ts';
+import { initPortal } from './monetize/portal.ts';
 import { finishCheckoutFromUrl } from './monetize/store.ts';
 import { loadSprites } from './render/sprites.ts';
 import { Story } from './story/play.ts';
@@ -16,6 +17,7 @@ showTitle(app);
 void loadSprites();
 // Monetization stays inert unless configured at build time (see growth/MONETIZATION.md).
 initAds();
+void initPortal();
 void finishCheckoutFromUrl().then((r) => { if (r) app.toast('Thank you! ❤️', `Purchase confirmed. Receipt code: ${r.reference}`, 'info'); });
 
 // Handy for debugging and automated tests: window.__cw.app.game.s, window.__cw.story.p

@@ -1,5 +1,6 @@
 import { analyticsConfigured, consent, deleteMyData, setConsent, track } from '../analytics.ts';
 import { sfx } from '../audio/sfx.ts';
+import { PORTAL } from '../monetize/portal.ts';
 import { playMusic } from '../audio/music.ts';
 import { MISSIONS } from '../data/missions.ts';
 import { MOTIONS } from '../data/meetings.ts';
@@ -37,8 +38,11 @@ export function showTitle(app: App): void {
           h('button', { class: 'big ghost', type: 'button', id: 'btn-settings', onclick: () => settingsModal(app) }, '⚙️ Settings')),
       ),
       !storageAvailable() ? h('p', { class: 'warn-note' }, 'Your browser is blocking storage, so progress cannot be saved in this window.') : null,
-      h('p', { class: 'fineprint' }, 'All characters are fictional. Free to play — no real money. ',
-        h('a', { href: 'privacy.html', class: 'fine-link' }, 'Privacy'), ' · ', h('a', { href: 'feedback.html', class: 'fine-link' }, 'Feedback & bugs')),
+      // Portal builds: no links that lead players off the portal (portal rule), and no statistics are collected.
+      PORTAL
+        ? h('p', { class: 'fineprint' }, 'All characters are fictional. Character art is AI-generated.')
+        : h('p', { class: 'fineprint' }, 'All characters are fictional. Free to play — no real money. ',
+          h('a', { href: 'privacy.html', class: 'fine-link' }, 'Privacy'), ' · ', h('a', { href: 'feedback.html', class: 'fine-link' }, 'Feedback & bugs')),
     ),
   );
   let t = 0;
@@ -59,7 +63,7 @@ export function showTitle(app: App): void {
   };
   requestAnimationFrame(draw);
   ($('#btn-play') as HTMLElement).focus();
-  if (consent() === null) consentPrompt();
+  if (consent() === null && !PORTAL) consentPrompt();
 }
 
 /** One-time, plain-language choice about anonymous play statistics. Nothing is sent before "Yes". */
@@ -188,7 +192,7 @@ export function settingsModal(app: App): void {
       h('button', { class: 'toggle', type: 'button', role: 'switch', 'aria-checked': String(!!st[key]),
         onclick: () => { (st as unknown as Record<string, boolean>)[key] = !st[key]; app.applySettings(); render(); } },
         h('span', { class: 'tlabel' }, label, h('small', {}, help)), h('span', { class: 'knob' }, st[key] ? 'On' : 'Off'));
-    body.append(
+    body.append(...([
       h('div', { class: 'field-label' }, 'Text size'),
       h('div', { class: 'seg', role: 'radiogroup', 'aria-label': 'Text size' },
         ...(['small', 'normal', 'large', 'xl'] as const).map((sz) =>
@@ -203,17 +207,17 @@ export function settingsModal(app: App): void {
       toggle('translations', 'Plain-English translations', 'Shows plain English under Pidgin and slang.'),
       toggle('labels', 'Place & name labels', 'Labels over people and objects in the compound.'),
       toggle('reduceMotion', 'Reduce motion', 'Fewer animations, instant walking.'),
-      h('button', { class: 'toggle', type: 'button', role: 'switch', 'aria-checked': String(consent() === 'yes'),
+      PORTAL ? null : h('button', { class: 'toggle', type: 'button', role: 'switch', 'aria-checked': String(consent() === 'yes'),
         onclick: () => { setConsent(consent() === 'yes' ? 'no' : 'yes'); render(); } },
         h('span', { class: 'tlabel' }, 'Anonymous play statistics', h('small', {}, analyticsConfigured() ? 'Helps us improve the game. No names, no ad tracking.' : 'Helps us improve the game. (Not connected yet, so nothing is sent.)')),
         h('span', { class: 'knob' }, consent() === 'yes' ? 'On' : 'Off')),
-      h('button', { class: 'linkish', type: 'button', id: 'btn-delete-data', onclick: async () => {
+      PORTAL ? null : h('button', { class: 'linkish', type: 'button', id: 'btn-delete-data', onclick: async () => {
         const ok = await confirmDialog('Delete my data?', 'This erases your anonymous play statistics from our server and gives you a new random id. Your game progress stays.', 'Delete', true);
         if (!ok) return;
         const r = await deleteMyData();
         app.toast(r === 'failed' ? 'Could not reach the server' : 'Done', r === 'failed' ? 'Try again later.' : 'Your statistics were deleted.', 'info');
       } }, 'Delete my statistics data'),
-    );
+    ].filter(Boolean) as Node[]));
   };
   render();
   openModal({ title: 'Settings', dismissable: true, body, actions: [{ label: 'Done', primary: true, onClick: () => {} }] });

@@ -5,6 +5,7 @@ import { sfx } from '../audio/sfx.ts';
 import { playMusic, sting, type Track } from '../audio/music.ts';
 import { track } from '../analytics.ts';
 import { newOffer, rewardedAvailable, showRewarded } from '../monetize/ads.ts';
+import { gameplay, midgame } from '../monetize/portal.ts';
 import { catalog, grownUpQuestion, ownsPremium, price, restore, startCheckout, type StoreItem } from '../monetize/store.ts';
 import { NPCS, PLAYER_LOOKS } from '../data/npcs.ts';
 import { createState } from '../engine/state.ts';
@@ -117,6 +118,7 @@ export class Story implements StoryApi {
 
   /** Hide Story screens and stop everything (called when other screens open). */
   leave(): void {
+    gameplay(false);
     this.abort();
     this.scene.stop();
     $('#screen-story').hidden = true;
@@ -128,6 +130,7 @@ export class Story implements StoryApi {
   }
 
   showMap(): void {
+    gameplay(false);
     this.abort();
     this.scene.stop();
     this.hideOthers();
@@ -275,6 +278,7 @@ export class Story implements StoryApi {
     this.mistakes = 0;
     this.earned = 0;
     this.started = performance.now();
+    gameplay(true);
     $('#s-level').textContent = `Level ${i + 1} · ${LEVELS[i].title}`;
     this.refreshCoins();
     this.scene.resize();
@@ -326,6 +330,7 @@ export class Story implements StoryApi {
   }
 
   private complete(): void {
+    gameplay(false);
     const i = this.level;
     const firstClear = !levelDone(this.p, i);
     const bonus = 0;
@@ -360,7 +365,7 @@ export class Story implements StoryApi {
       h('div', { class: 's-card-btns' },
         last
           ? h('button', { class: 'big primary', type: 'button', id: 'btn-next', onclick: () => this.showMap() }, '🏘️ All levels')
-          : h('button', { class: 'big primary', type: 'button', id: 'btn-next', onclick: () => void this.play(i + 1) }, '▶ NEXT LEVEL'),
+          : h('button', { class: 'big primary', type: 'button', id: 'btn-next', onclick: (e: Event) => { (e.currentTarget as HTMLButtonElement).disabled = true; void midgame().then(() => this.play(i + 1)); } }, '▶ NEXT LEVEL'),
         h('button', { class: 'big', type: 'button', id: 'btn-again', onclick: () => void this.play(i) }, '↻ Play again'),
         affordable ? h('button', { class: 'big', type: 'button', onclick: () => this.shop() }, '🛍️ Decorate') : null,
         rewardedAvailable() ? this.adButton() : null,
@@ -403,8 +408,10 @@ export class Story implements StoryApi {
 
   pause(): void {
     if ($('#screen-story').hidden || !$('#s-card').hidden) return;
+    gameplay(false);
     openModal({
       title: 'Paused', kicker: `Level ${this.level + 1}`, dismissable: true,
+      onClose: () => { if (!$('#screen-story').hidden && $('#s-card').hidden) gameplay(true); },
       actions: [
         { label: '▶ Keep playing', primary: true, onClick: () => {} },
         { label: '↻ Start this level again', onClick: () => { setTimeout(() => void this.play(this.level), 0); } },

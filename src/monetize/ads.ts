@@ -7,6 +7,7 @@
 //   player's own device, so there is nothing of value to defraud. Mobile builds should use AdMob
 //   rewarded ads with server-side verification (see growth/MONETIZATION.md).
 import { track } from '../analytics.ts';
+import { PORTAL, portalReady, portalRewarded } from './portal.ts';
 
 const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
 const PROVIDER = env.VITE_ADS_PROVIDER || 'none';
@@ -46,7 +47,12 @@ export function initAds(childDirected = true): void {
 }
 
 export function rewardedAvailable(): boolean {
-  return PROVIDER === 'adsense' && ready && today().n < DAILY_CAP;
+  return ((PROVIDER === 'adsense' && ready) || portalReady()) && today().n < DAILY_CAP;
+}
+
+function countView(): void {
+  const t = today();
+  try { localStorage.setItem(KEY, JSON.stringify({ day: t.day, n: t.n + 1 })); } catch { /* ignore */ }
 }
 
 /** Make an offer id for one button; the reward can be claimed at most once per id. */
@@ -61,6 +67,14 @@ export function showRewarded(offer: string): Promise<boolean> {
     if (used.has(offer) || !rewardedAvailable()) { resolve(false); return; }
     used.add(offer);
     const placement = offer.split(':')[0];
+    if (PORTAL) {
+      track('ad_started', { placement, portal: PORTAL });
+      void portalRewarded().then((ok) => {
+        if (ok) { countView(); track('ad_completed', { placement, portal: PORTAL }); } else track('ad_skipped', { placement, portal: PORTAL });
+        resolve(ok);
+      });
+      return;
+    }
     let viewed = false;
     const w = window as unknown as { adBreak?: AdBreak };
     w.adBreak?.({
@@ -69,8 +83,7 @@ export function showRewarded(offer: string): Promise<boolean> {
       beforeReward: (showAdFn: () => void) => { track('ad_started', { placement }); showAdFn(); },
       adViewed: () => {
         viewed = true;
-        const t = today();
-        try { localStorage.setItem(KEY, JSON.stringify({ day: t.day, n: t.n + 1 })); } catch { /* ignore */ }
+        countView();
         track('ad_completed', { placement });
       },
       adDismissed: () => track('ad_skipped', { placement }),

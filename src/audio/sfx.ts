@@ -3,13 +3,20 @@
 
 let ctx: AudioContext | null = null;
 let enabled = true;
+let adMuted = false;
 
 export function setSound(on: boolean): void {
   enabled = on;
 }
 
+/** Silence sound effects during an ad break without changing the player's setting. */
+export function muteSfxForAd(on: boolean): void {
+  adMuted = on;
+  if (ctx) void (on ? ctx.suspend() : ctx.resume()).catch(() => {});
+}
+
 function ac(): AudioContext | null {
-  if (!enabled) return null;
+  if (!enabled || adMuted) return null;
   try {
     ctx ??= new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
     if (ctx.state === 'suspended') void ctx.resume();
