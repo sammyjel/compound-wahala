@@ -10,8 +10,9 @@ This file is the **business** side: which money routes fit this game, in what or
   pressures children to pay, and it shapes which sponsors are acceptable.
 - Ads shown to Nigerian visitors pay far less per view than ads shown in the UK/US. Diaspora players are worth more per ad; sponsors and paid
   content earn the same wherever the player is.
-- You live in Turkey: **check how each platform pays you out** before choosing (PayPal does not operate in Turkey; Paystack
-  needs a Nigerian registered business). Gumroad, which you already plan to use for ESL packs, is the simplest known payout path.
+- Payouts: you already have a registered company (**DMBTREND LTD, RC 9910105**) with a **live Paystack account** (NGN; USD collection
+  live since 2026-10-16, USD payout account still in review). The game's built-in Paystack store can run on it — tell Paystack you are
+  adding digital game items first, since their risk review approved physical products. PayPal does not operate in Turkey.
 
 ## Ranked: best fit first
 
@@ -22,7 +23,7 @@ This file is the **business** side: which money routes fit this game, in what or
 | 3 | **Sponsored levels for NGOs / public-health / brands** ("serious game" commissions) | A level like "Malaria net palaver" or "Wash hand, no wahala" is exactly what Nigerian NGOs, health programmes and edu-funders pay for. One commission can outweigh months of ads. | Your outreach (I write the pitch deck + 1-page demo); a real dashboard number helps | $0 | After ~1,000 players |
 | 4 | **In-world sponsorship** (a real brand's kiosk sign, generator, decorations) | The compound is a natural billboard. Brands that fit kids: telecom (airtime), stationery, banks' kids' accounts, solar/inverter companies. **No junk food or betting**, and Nigerian ads may need **ARCON** approval — check before signing. | Sponsor deals; I add a swappable sponsor slot + clear "Sponsored" label | $0 | After traffic proves out |
 | 5 | **Rewarded ads** (AdSense H5 Games; AdinPlay as an alternative) | Already built: optional "+20 coins" after a level, max 3/day. Low earnings on Nigerian traffic; kids' rules apply (no personalised ads). | AdSense account + approval; your OK | $0 | After portals, if retention holds |
-| 6 | **Cosmetic purchases** (owambe decorations, outfits) | Built + tested (Paystack). Grown-up gate, no pay-to-win. | Paystack business (CAC) **or** a different processor that pays out to you; your OK | Fees per sale | Later |
+| 6 | **Cosmetic purchases** (owambe decorations, outfits) | Built + tested (Paystack). Grown-up gate, no pay-to-win. | Your existing DMBTREND LTD Paystack account (keys as Worker secrets, never in code) + your OK | Fees per sale | Later |
 | 7 | **Android app** (Play Store) with AdMob + Play Billing | Store discovery; most Nigerian players are on Android. | $25 Play Console + your OK | $25 once | When D1 retention ≥ 25% |
 | 8 | **Supporter tips / merch** (Ko-fi, Gumroad "pay what you want", WhatsApp sticker pack → stickers/T-shirts) | Small, but the characters and Pidgin lines are very shareable. Stickers are also free marketing. | Payout account | $0 (print-on-demand) | Anytime |
 
@@ -41,5 +42,5 @@ the day ads or payments switch on (the build now refuses to deploy "no ads" text
 ## Decisions I need from you
 1. OK to prepare **portal builds** (CrazyGames + GameDistribution)? You create the accounts.
 2. OK to build the **Classroom Pack** PDF for Gumroad? Price?
-3. Which **payout method** works for you in Turkey (Gumroad bank payout? Wise? a Nigerian account?) — this decides #6 and #8.
+3. OK to use the **DMBTREND LTD Paystack account** for the game's cosmetic items (NGN prices first)?
 4. Any NGO/brand contacts for #3/#4? If not, I'll draft a target list and a pitch when there are player numbers to show.
